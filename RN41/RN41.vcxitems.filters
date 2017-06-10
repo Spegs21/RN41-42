@@ -16,7 +16,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <Text Include="$(MSBuildThisFileDirectory)readme.txt" />
     <Text Include="$(MSBuildThisFileDirectory)library.properties" />
     <Text Include="E:\Users\Chris\Documents\Arduino\libraries\RN41\RN41\RN41.h">
       <Filter>Header Files</Filter>
