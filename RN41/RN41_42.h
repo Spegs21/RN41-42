@@ -5,8 +5,8 @@
  Editor:	http://www.visualmicro.com
 */
 
-#ifndef _RN41_h
-#define _RN41_h
+#ifndef _RN41_42_h
+#define _RN41_42_h
 
 #if defined(ARDUINO) && ARDUINO >= 100
 	#include "arduino.h"
@@ -14,11 +14,11 @@
 	#include "WProgram.h"
 #endif
 
-class RN41 {
+class RN41_42 {
 
 	public:
 
-		RN41(HardwareSerial &_serial);
+		RN41_42(HardwareSerial &_serial);
 
 		//Public Commands
 

@@ -11,14 +11,14 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="E:\Users\Chris\Documents\Arduino\libraries\RN41\RN41\RN41.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
     <Text Include="$(MSBuildThisFileDirectory)library.properties" />
-    <Text Include="E:\Users\Chris\Documents\Arduino\libraries\RN41\RN41\RN41.h">
+    <Text Include="E:\Users\Chris\Documents\Arduino\libraries\RN41\RN41\RN41_42.h">
       <Filter>Header Files</Filter>
     </Text>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="E:\Users\Chris\Documents\Arduino\libraries\RN41\RN41\RN41_42.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

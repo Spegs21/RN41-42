@@ -4,6 +4,7 @@
     <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
     <HasSharedItems>true</HasSharedItems>
     <ItemsProjectGuid>{f6b38237-7544-4d0a-814a-2df97625204a}</ItemsProjectGuid>
+    <ItemsProjectName>RN41_42</ItemsProjectName>
   </PropertyGroup>
   <ItemDefinitionGroup>
     <ClCompile>
@@ -15,12 +16,9 @@
   </ItemGroup>
   <ItemGroup>
     <Text Include="$(MSBuildThisFileDirectory)library.properties" />
-    <Text Include="$(MSBuildThisFileDirectory)RN41.h" />
+    <Text Include="$(MSBuildThisFileDirectory)RN41_42.h" />
   </ItemGroup>
   <ItemGroup>
-    <!-- <ClInclude Include="$(MSBuildThisFileDirectory)RN41.h" /> -->
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="$(MSBuildThisFileDirectory)RN41.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)RN41_42.cpp" />
   </ItemGroup>
 </Project>

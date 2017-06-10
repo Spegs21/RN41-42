@@ -5,13 +5,13 @@
  Editor:	http://www.visualmicro.com
 */
 
-#include "RN41.h"
+#include "RN41_42.h"
 
-RN41::RN41(HardwareSerial &_serial): serial(_serial) {
+RN41_42::RN41_42(HardwareSerial &_serial): serial(_serial) {
 	_commandMode = false;
 }
 
-void RN41::begin(unsigned long baudrate)
+void RN41_42::begin(unsigned long baudrate)
 {
 	serial.begin(baudrate);
 }
@@ -19,7 +19,7 @@ void RN41::begin(unsigned long baudrate)
 //Resets The Device
 //Also Exits Command Mode
 //Device Must Be Reset After A Config Change To Take Effect
-bool RN41::reset() {
+bool RN41_42::reset() {
 	enterCommandMode();
 	sendString("R,1\r\n");
 	if (getString() == "Reboot!\r\n") {
@@ -33,7 +33,7 @@ bool RN41::reset() {
 
 //Sets Device Name
 //Maximum 20 characters
-bool RN41::setDeviceName(String name) {
+bool RN41_42::setDeviceName(String name) {
 	enterCommandMode();
 	sendString("SN," + name + "\r\n");
 	if (getString() == "AOK\r\n") {
@@ -52,7 +52,7 @@ bool RN41::setDeviceName(String name) {
 //2 - SSP "Just Works" Mode
 //4 - Pin Code
 //Default Mode: 1
-bool RN41::setAuthenticationMode(int authMode) {
+bool RN41_42::setAuthenticationMode(int authMode) {
 	enterCommandMode();
 	if (authMode < 0 || authMode > 4 || authMode == 3) {
 		return false;
@@ -80,7 +80,7 @@ bool RN41::setAuthenticationMode(int authMode) {
 //5 - Auto-Connect Any Mode
 //6 - Pairing Mode
 //Default Mode: 4
-bool RN41::setMode(int mode) {
+bool RN41_42::setMode(int mode) {
 	enterCommandMode();
 	if (mode < 0 || mode > 6) {
 		return false;
@@ -100,7 +100,7 @@ bool RN41::setMode(int mode) {
 
 //Gets Bluetooth Address
 //returns the 12 didgite MAC ID
-String RN41::getBluetoothAddress() {
+String RN41_42::getBluetoothAddress() {
 	enterCommandMode();
 	sendString("GB\r\n");
 	String result = getString();
@@ -112,7 +112,7 @@ String RN41::getBluetoothAddress() {
 //Gets Connection Status
 //0,0,0 = Not Connected
 //1,0,0 = Connected
-bool RN41::getConnectionStatus() {
+bool RN41_42::getConnectionStatus() {
 	enterCommandMode();
 	sendString("GK\r\n");
 	if (getString() == "1,0,0\r\n") {
@@ -126,7 +126,7 @@ bool RN41::getConnectionStatus() {
 }
 
 //Get The Device's Firmware Version
-String RN41::getFirmwareVersion() {
+String RN41_42::getFirmwareVersion() {
 	enterCommandMode();
 	sendString("V\r\n");
 	String version = getString();
@@ -134,19 +134,19 @@ String RN41::getFirmwareVersion() {
 	return version;
 }
 
-bool RN41::connectToAddress(String address)
+bool RN41_42::connectToAddress(String address)
 {
 	return false;
 }
 
-bool RN41::sendMessage(String message, char terminationChar) {
+bool RN41_42::sendMessage(String message, char terminationChar) {
 	if (_commandMode) { return false; }
 	String msg = message + terminationChar;
 	serial.write(printf("%s", msg.c_str()));
 	return true;
 }
 
-String RN41::recieveMessage(char terminationChar) {
+String RN41_42::recieveMessage(char terminationChar) {
 	return getString(terminationChar);
 	if (_commandMode) { return "*ERROR*"; }
 }
@@ -154,7 +154,7 @@ String RN41::recieveMessage(char terminationChar) {
 //Private Functions Below
 
 //Enter Command Mode
-bool RN41::enterCommandMode() {
+bool RN41_42::enterCommandMode() {
 	if (_commandMode == true) {
 		return true;
 	}
@@ -169,7 +169,7 @@ bool RN41::enterCommandMode() {
 }
 
 //Exit Command Mode
-bool RN41::exitCommandMode() {
+bool RN41_42::exitCommandMode() {
 	if (_commandMode == false) {
 		return true;
 	}
@@ -183,15 +183,15 @@ bool RN41::exitCommandMode() {
 	}
 }
 
-void RN41::sendString(String msg) {
+void RN41_42::sendString(String msg) {
 	serial.write(printf("%s", msg.c_str()));
 }
 
-bool RN41::readable() {
+bool RN41_42::readable() {
 	return serial.available();
 }
 
-String RN41::getString() {
+String RN41_42::getString() {
 	String msg = "";
 	char prev = ' ';
 	char curr = ' ';
@@ -209,7 +209,7 @@ String RN41::getString() {
 	return msg;
 }
 
-String RN41::getString(char terminationChar) {
+String RN41_42::getString(char terminationChar) {
 	String msg = "";
 	char curr = ' ';
 	while (1) {
