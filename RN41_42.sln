@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.26430.12
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RN41_42", "RN41\RN41.vcxitems", "{F6B38237-7544-4D0A-814A-2DF97625204A}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RN41_42", "RN41_42.vcxitems", "{F6B38237-7544-4D0A-814A-2DF97625204A}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{CD2EE4B0-DD00-4BA9-90EB-240147BE98E4}"
 	ProjectSection(SolutionItems) = preProject
@@ -12,12 +12,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		README.md = README.md
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Blink", "..\..\My Examples\131415326803532201\Blink\Blink.vcxproj", "{C5F80730-F44F-4478-BDAE-6634EFC2CA88}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Blink", "..\..\My Examples\131415335709877674\Blink\Blink.vcxproj", "{C5F80730-F44F-4478-BDAE-6634EFC2CA88}"
 EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
-		RN41\RN41.vcxitems*{c5f80730-f44f-4478-bdae-6634efc2ca88}*SharedItemsImports = 4
-		RN41\RN41.vcxitems*{f6b38237-7544-4d0a-814a-2df97625204a}*SharedItemsImports = 9
+		RN41_42.vcxitems*{c5f80730-f44f-4478-bdae-6634efc2ca88}*SharedItemsImports = 4
+		RN41_42.vcxitems*{f6b38237-7544-4d0a-814a-2df97625204a}*SharedItemsImports = 9
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x86 = Debug|x86
