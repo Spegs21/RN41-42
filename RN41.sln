@@ -5,11 +5,6 @@ VisualStudioVersion = 15.0.26430.12
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RN41", "RN41\RN41.vcxitems", "{F6B38237-7544-4D0A-814A-2DF97625204A}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{7D23C536-EEFA-4D7E-AB87-4AE4B46E7A7A}"
-	ProjectSection(SolutionItems) = preProject
-		Readme.md = Readme.md
-	EndProjectSection
-EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		RN41\RN41.vcxitems*{f6b38237-7544-4d0a-814a-2df97625204a}*SharedItemsImports = 9
