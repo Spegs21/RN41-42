@@ -5,6 +5,8 @@
  Editor:	http://www.visualmicro.com
 */
 
+
+
 #ifndef _RN41_42_h
 #define _RN41_42_h
 
@@ -19,18 +21,37 @@ class RN41_42 {
 	public:
 
 		RN41_42(HardwareSerial &_serial);
-
-		//Public Commands
-
 		void begin(unsigned long baudrate);
+		void begin();
 		bool reset();
 
 		//set commands
-		bool setDeviceName(String name);
+		bool setS7(bool en);
 		bool setAuthenticationMode(int authMode);
-		bool setMode(int mode); //done
+		bool setBreak(int breakVal);
+		bool setServiceClass(String hex);
+		bool setDeviceClass(String hex);
+		bool setUUID(String hex);
+		bool restoreFactoryDefaults();
+		bool setHIDRegister(String hex);
+		bool setInquiryScanWindow(String hex);
+		bool setPageScanWindow(String hex);
+		bool setUARTParity(String parity);
+		bool setDeviceName(String name);
+		bool setExtendedStatusString(String string);
+		bool setPinCode(unsigned int pin);
+		bool setMask(unsigned int mask);
+		bool setRemoteAddress(String address);
+		bool setServiceName(String name);
+		bool setConfigTimer(unsigned int value);
+		bool setUARTBaud(unsigned int baud);
+		bool setMode(int mode);
+		bool eraseRemoteAddress();
+		bool setRemoteAddressLastObserved();
 
-								//get commands
+		
+
+		//get commands
 		String getBluetoothAddress();
 		bool getConnectionStatus();
 		String getFirmwareVersion();
@@ -48,6 +69,7 @@ class RN41_42 {
 
 		//Vaiables
 		bool _commandMode;
+		unsigned long _baud;
 
 		//Private Commands
 		bool enterCommandMode();
@@ -58,6 +80,7 @@ class RN41_42 {
 		bool readable();
 		String getString();
 		String getString(char terminationChar);
+		bool isAOK();
 	};
 
 #endif
