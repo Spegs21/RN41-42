@@ -286,58 +286,33 @@ bool RN41_42::setConfigTimer(unsigned int value) {
 //SU,<value>
 bool RN41_42::setUARTBaud(unsigned int baud) {
 	unsigned int currentBaud = _baud;
-	unsigned int proposedBaud;
 	switch (baud) {
-		case 12:
-			proposedBaud = 1200;
-			break;
-		case 24:
-			proposedBaud = 2400;
-			break;
-		case 48:
-			proposedBaud = 4800;
-			break;
-		case 96:
-			proposedBaud = 9600;
-			break;
-		case 19:
-			proposedBaud = 19200;
-			break;
-		case 28:
-			proposedBaud = 28800;
-			break;
-		case 38:
-			proposedBaud = 38400;
-			break;
-		case 57:
-			proposedBaud = 57600;
-			break;
-		case 11:
-			proposedBaud = 115000;
-			break;
-		case 23:
-			proposedBaud = 230000;
-			break;
-		case 46:
-			proposedBaud = 460000;
-			break;
-		case 92:
-			proposedBaud = 921000;
-			break;
+		case 1200:
+		case 2400:
+		case 4800:
+		case 9600:
+		case 19200:
+		case 28800:
+		case 38400:
+		case 57600:
+		case 115000:
+		case 230000:
+		case 460000:
+		case 921000:
+			enterCommandMode();
+			sendString("SU," + String(baud).substring(0,1) + "\r\n");
+			serial.end();
+			this->begin(baud);
+			if (isAOK()) {
+				return true;
+			}
+			else {
+				serial.end();
+				this->begin(currentBaud);
+				return false;
+			}
 		default:
 			return false;
-	}
-	enterCommandMode();
-	sendString("SU," + String(baud) + "\r\n");
-	serial.end();
-	this->begin(proposedBaud);
-	if (isAOK()) {
-		return true;
-	}
-	else {
-		serial.end();
-		this->begin(currentBaud);
-		return false;
 	}
 }
 
