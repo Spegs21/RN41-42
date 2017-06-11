@@ -7,8 +7,14 @@
 
 #include "RN41_42.h"
 
-RN41_42::RN41_42(HardwareSerial &_serial): serial(_serial) {
+RN41_42::RN41_42(HardwareSerial &_serial) : serial(_serial) {
 	_commandMode = false;
+	_configChar = '$';
+}
+
+RN41_42::RN41_42(HardwareSerial &_serial, char configChar): serial(_serial) {
+	_commandMode = false;
+	_configChar = configChar;
 }
 
 void RN41_42::begin(unsigned long baudrate)
@@ -284,6 +290,7 @@ bool RN41_42::setConfigTimer(unsigned int value) {
 
 //Set UART Baud
 //SU,<value>
+//Full baudrate required so it can be changed on the microcontroller side too.
 bool RN41_42::setUARTBaud(unsigned int baud) {
 	unsigned int currentBaud = _baud;
 	switch (baud) {
@@ -316,7 +323,120 @@ bool RN41_42::setUARTBaud(unsigned int baud) {
 	}
 }
 
+//Set Sniff Mode
+//SW,<value>
+bool RN41_42::setSniff(String hex) {
+	enterCommandMode();
+	sendString("SW," + hex + "\r\n");
+	return isAOK();
+}
 
+//Set Bonding
+//SX,<flag>
+bool RN41_42::setBonding(bool en){
+	enterCommandMode();
+	if (en == true) {
+		sendString("SX,1\r\n");
+	}
+	else {
+		sendString("SX,0\r\n");
+	}
+	return	isAOK();
+}
+
+//Set Transmit Power
+//SY,<hex value>
+bool RN41_42::setTransmitPower(String hex) {
+	if (hex == "0010" || hex == "000C" || hex == "0008" || hex == "0004" || hex == "0000" || hex == "FFFC" || hex == "FFF8" || hex == "FFF4") {
+		enterCommandMode();
+		sendString("SY," + hex + "\r\n");
+		return isAOK();
+	}
+	else {
+		return false;
+	}
+}
+
+//Set Non-Standard Baud
+//SZ,<value>
+//Takes effect on reboot
+bool RN41_42::setNonStandardBaud(unsigned int multi) {
+	enterCommandMode();
+	sendString("SZ," + String(multi) + "\r\n");
+	if (isAOK()) {
+		this->reset();
+		//Wait for reboot
+		delay(500);
+		serial.end();
+		this->begin((unsigned long)(multi / 0.004096)); //This probably won't work well
+		return true;
+	}
+	else {
+		return false;
+	}
+}
+
+//Set Profile
+//S~,<value>
+bool RN41_42::setProfile(int value) {
+	if (value >= 0 && value < 7) {
+		enterCommandMode();
+		sendString("S~," + String(value) + "\r\n");
+		return isAOK();
+	}
+	else {
+		return false;
+	}
+}
+
+//Set Serialized Friendly Name
+//S-,<string>
+bool RN41_42::setSerializedFriendlyName(String name) {
+	if (name.length() > 0 && name.length() < 16) {
+		enterCommandMode();
+		sendString("S-," + name + "\r\n");
+		return isAOK();
+	}
+	else {
+		return false;
+	}
+}
+
+//Set Roll Switch
+//S?,<flag>
+bool RN41_42::setRoleSwitch(bool en) {
+	enterCommandMode();
+	if (en == true) {
+		sendString("S?,1\r\n");
+	}
+	else {
+		sendString("S?,0\r\n");
+	}
+	return	isAOK();
+}
+
+//Set Configuration Character
+//S$,<char>
+bool RN41_42::setConfigChar(char c) {
+	enterCommandMode();
+	sendString("S$," + String(c) + "\r\n");
+	if (isAOK()) {
+		_configChar = c;
+		return true;
+	}
+	else {
+		return false;
+	}
+
+}
+
+//Set Low-Power Connect Mode
+//S|,<value>
+bool RN41_42::setLPConnectMode(String hex) {
+	enterCommandMode();
+	sendString("S|," + hex + "\r\n");
+	return isAOK();
+}
 
 //Resets The Device
 //Also Exits Command Mode
@@ -393,7 +513,9 @@ bool RN41_42::enterCommandMode() {
 	if (_commandMode == true) {
 		return true;
 	}
-	sendString("$$$");
+	for (int i = 0; i < 3; i++) {
+		sendString(String(_configChar));
+	}
 	if (getString() == "CMD\r\n") {
 		_commandMode = true;
 		return true;

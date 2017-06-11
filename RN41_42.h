@@ -10,6 +10,7 @@
 #ifndef _RN41_42_h
 #define _RN41_42_h
 
+
 #if defined(ARDUINO) && ARDUINO >= 100
 	#include "arduino.h"
 #else
@@ -21,6 +22,7 @@ class RN41_42 {
 	public:
 
 		RN41_42(HardwareSerial &_serial);
+		RN41_42(HardwareSerial & _serial, char configChar);
 		void begin(unsigned long baudrate);
 		void begin();
 		bool reset();
@@ -37,17 +39,31 @@ class RN41_42 {
 		bool setInquiryScanWindow(String hex);
 		bool setPageScanWindow(String hex);
 		bool setUARTParity(String parity);
+		bool setMode(int mode);
 		bool setDeviceName(String name);
 		bool setExtendedStatusString(String string);
 		bool setPinCode(unsigned int pin);
 		bool setMask(unsigned int mask);
 		bool setRemoteAddress(String address);
+		bool eraseRemoteAddress();
+
+		bool setRemoteAddressLastObserved();
 		bool setServiceName(String name);
+
 		bool setConfigTimer(unsigned int value);
 		bool setUARTBaud(unsigned int baud);
-		bool setMode(int mode);
-		bool eraseRemoteAddress();
-		bool setRemoteAddressLastObserved();
+		bool setSniff(String hex);
+		bool setBonding(bool en);
+		bool setTransmitPower(String hex);
+		bool setNonStandardBaud(unsigned int multi);
+		bool setProfile(int value);
+		bool setSerializedFriendlyName(String name);
+		bool setRoleSwitch(bool en);
+		bool setConfigChar(char c);
+		bool setLPConnectMode(String hex);
+
+		
+
 
 		
 
@@ -70,6 +86,7 @@ class RN41_42 {
 		//Vaiables
 		bool _commandMode;
 		unsigned long _baud;
+		char _configChar;
 
 		//Private Commands
 		bool enterCommandMode();
