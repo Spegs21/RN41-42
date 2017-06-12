@@ -12,12 +12,12 @@
   </ItemGroup>
   <ItemGroup>
     <Text Include="$(MSBuildThisFileDirectory)library.properties" />
-    <Text Include="E:\Users\Chris\Documents\Arduino\libraries\RN41_42\RN41_42.h">
+    <Text Include="$(MSBuildThisFileDirectory)RN41_42.h">
       <Filter>Header Files</Filter>
     </Text>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="E:\Users\Chris\Documents\Arduino\libraries\RN41_42\RN41_42.cpp">
+    <ClCompile Include="$(MSBuildThisFileDirectory)RN41_42.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -544,25 +544,15 @@ void RN41_42::sendString(String msg) {
 	serial.write(printf("%s", msg.c_str()));
 }
 
-bool RN41_42::readable() {
-	return serial.available();
-}
-
 String RN41_42::getString() {
 	String msg = "";
 	char prev = ' ';
 	char curr = ' ';
-	while (1) {
-		if (serial.available()) {
-			prev = curr;
-			curr = serial.read();
-			msg += curr;
-			if (prev == '\r' && curr == '\n') {
-				break;
-			}
-		}
+	while (serial.available()) {
+		prev = curr;
+		curr = serial.read();
+		msg += curr;
 	}
-
 	return msg;
 }
 
