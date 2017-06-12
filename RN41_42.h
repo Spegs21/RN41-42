@@ -62,18 +62,23 @@ class RN41_42 {
 		bool setConfigChar(char c);
 		bool setLPConnectMode(String hex);
 
-		
-
-
-		
-
 		//get commands
+		String getBasicSettings();
+		String getExtendedSettings();
 		String getBluetoothAddress();
+		String getConnectedRemoteAddress();
 		bool getConnectionStatus();
+		String getStoredRemoteAddress();
+		String getGPIOStatus();
 		String getFirmwareVersion();
 
 		//action commands
+		String displayDipwitchValues();
+		bool connectToAddress();
 		bool connectToAddress(String address);
+		bool connectToAddressFast(String address);
+
+
 
 		//Message Mode
 		bool sendMessage(String message, char terminationChar);
