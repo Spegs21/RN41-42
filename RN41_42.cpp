@@ -546,26 +546,27 @@ void RN41_42::sendString(String msg) {
 
 String RN41_42::getString() {
 	String msg = "";
-	char prev = ' ';
-	char curr = ' ';
+	char prev;
+	char curr;
 	while (serial.available()) {
 		prev = curr;
 		curr = serial.read();
 		msg += curr;
+		if (prev == '\r' && curr == '\n') {
+			break;
+		}
 	}
 	return msg;
 }
 
 String RN41_42::getString(char terminationChar) {
 	String msg = "";
-	char curr = ' ';
-	while (1) {
-		if (serial.available()) {
-			curr = serial.read();
-			msg += curr;
-			if (curr == terminationChar) {
-				break;
-			}
+	char curr;
+	while (serial.available()) {
+		curr = serial.read();
+		msg += curr;
+		if (curr == terminationChar) {
+			break;
 		}
 	}
 	return msg;
