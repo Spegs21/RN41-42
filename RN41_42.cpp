@@ -544,10 +544,6 @@ void RN41_42::sendString(String msg) {
 	serial.write(printf("%s", msg.c_str()));
 }
 
-bool RN41_42::readable() {
-	return serial.available();
-}
-
 String RN41_42::getString() {
 	String msg = "";
 	char prev;

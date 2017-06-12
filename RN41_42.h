@@ -99,7 +99,6 @@ class RN41_42 {
 
 		//Send Data
 		void sendString(String msg);
-		bool readable();
 		String getString();
 		String getString(char terminationChar);
 		bool isAOK();
