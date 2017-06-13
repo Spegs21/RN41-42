@@ -38,11 +38,11 @@ class RN41_42 {
 		bool setHIDRegister(String hex);
 		bool setInquiryScanWindow(String hex);
 		bool setPageScanWindow(String hex);
-		bool setUARTParity(String parity);
+		bool setUARTParity(char parity);
 		bool setMode(int mode);
 		bool setDeviceName(String name);
 		bool setExtendedStatusString(String string);
-		bool setPinCode(unsigned int pin);
+		bool setPinCode(String pin);
 		bool setMask(unsigned int mask);
 		bool setRemoteAddress(String address);
 		bool eraseRemoteAddress();
@@ -89,9 +89,12 @@ class RN41_42 {
 		HardwareSerial &serial;
 
 		//Vaiables
+
 		bool _commandMode;
 		unsigned long _baud;
 		char _configChar;
+
+		bool res;
 
 		//Private Commands
 		bool enterCommandMode();

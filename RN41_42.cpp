@@ -12,7 +12,7 @@ RN41_42::RN41_42(HardwareSerial &_serial) : serial(_serial) {
 	_configChar = '$';
 }
 
-RN41_42::RN41_42(HardwareSerial &_serial, char configChar): serial(_serial) {
+RN41_42::RN41_42(HardwareSerial &_serial, char configChar) : serial(_serial) {
 	_commandMode = false;
 	_configChar = configChar;
 }
@@ -41,7 +41,7 @@ bool RN41_42::setS7(bool en) {
 	else {
 		sendString("S7,0\r\n");
 	}
-	return	isAOK();
+	return isAOK();
 }
 
 //Set Authentication Mode
@@ -53,28 +53,25 @@ bool RN41_42::setS7(bool en) {
 //4 - Pin Code
 //Default Mode: 1
 bool RN41_42::setAuthenticationMode(int authMode) {
-	enterCommandMode();
-	if (authMode < 0 || authMode > 4 || authMode == 3) {
-		return false;
-	}
-	char buf[1];
-	sprintf(buf, "SA,%d\r\n", authMode);
-	String msg = buf;
-	sendString(msg);
-	if (isAOK()) {
-		reset();
-		return true;
+	if (authMode >= 0 && authMode <= 4 && authMode != 3) {
+		enterCommandMode();
+		char buf[1];
+		sprintf(buf, "SA,%d\r\n", authMode);
+		String msg = buf;
+		sendString(msg);
+		return isAOK();
 	}
 	else {
 		return false;
 	}
+	
 }
 
 //Set Break
 //SB,<value>
 bool RN41_42::setBreak(int breakVal) {
-	enterCommandMode();
-	if (breakVal > 0 && breakVal < 7) {
+	if (breakVal >= 1 && breakVal <= 6) {
+		enterCommandMode();
 		char buf[1];
 		sprintf(buf, "SB,%d\r\n", breakVal);
 		String msg = buf;
@@ -145,10 +142,10 @@ bool RN41_42::setPageScanWindow(String hex) {
 
 //Set UART Parity
 //SL,<value>
-bool RN41_42::setUARTParity(String parity) {
-	if (parity == "E" || parity == "O" || parity == "N") {
+bool RN41_42::setUARTParity(char parity) {
+	if (parity == 'E' || parity == 'O' || parity == 'N') {
 		enterCommandMode();
-		sendString("SL," + parity + "\r\n");
+		sendString("SL," + String(parity) + "\r\n");
 		return isAOK();
 	}
 	else {
@@ -168,28 +165,31 @@ bool RN41_42::setUARTParity(String parity) {
 //6 - Pairing Mode
 //Default Mode: 4
 bool RN41_42::setMode(int mode) {
-	enterCommandMode();
-	if (mode < 0 || mode > 6) {
+	if (mode >= 0 && mode <= 6) {
+		enterCommandMode();
+		char buf[1];
+		sprintf(buf, "SM,%d\r\n", mode);
+		String msg = buf;
+		sendString(msg);
+		return isAOK();
+	}
+	else {
 		return false;
 	}
-	char buf[1];
-	sprintf(buf, "SM,%d\r\n", mode);
-	String msg = buf;
-	sendString(msg);
-	return isAOK();
+	
 }
 
 //Sets Device Name
 //SN,<string>
 //Maximum 20 characters
 bool RN41_42::setDeviceName(String name) {
-	if (name.length() > 20) {
-		return false;
-	}
-	else {
+	if (name.length() >= 1 && name.length() <= 20) {
 		enterCommandMode();
 		sendString("SN," + name + "\r\n");
 		return isAOK();
+	}
+	else {
+		return false;
 	}
 }
 
@@ -197,44 +197,39 @@ bool RN41_42::setDeviceName(String name) {
 //SO,<string>
 //Maximum 8 characters
 bool RN41_42::setExtendedStatusString(String string) {
-	if (string.length() > 8) {
-		return false;
-	}
-	else {
+	if (string.length() >= 1 && string.length() <= 8) {
 		enterCommandMode();
 		sendString("SO," + string + "\r\n");
 		return isAOK();
+	}
+	else {
+		return false;
 	}
 }
 
 //Sets the Security Pin
 //SP,<string>
-bool RN41_42::setPinCode(unsigned int pin) {
-	if (pin > 9999) {
-		return false;
-	}
-	else {
-		enterCommandMode();
-		sendString("SP," + String(pin) + "\r\n");
-		return isAOK();
-	}
+bool RN41_42::setPinCode(String pin) {
+	enterCommandMode();
+	sendString("SP," + pin + "\r\n");
+	return isAOK();
 }
 
 //Sets the Mask
 //SQ,<string>
 bool RN41_42::setMask(unsigned int mask) {
 	switch (mask) {
-		case 0:
-		case 4:
-		case 8:
-		case 16:
-		case 128:
-		case 256:
-			enterCommandMode();
-			sendString("SQ," + String(mask) + "\r\n");
-			return isAOK();
-		default:
-			return false;
+	case 0:
+	case 4:
+	case 8:
+	case 16:
+	case 128:
+	case 256:
+		enterCommandMode();
+		sendString("SQ," + String(mask) + "\r\n");
+		return isAOK();
+	default:
+		return false;
 	}
 }
 
@@ -265,7 +260,7 @@ bool RN41_42::setRemoteAddressLastObserved() {
 //Set Service Name
 //SS,<string>
 bool RN41_42::setServiceName(String name) {
-	if (name.length() > 0 && name.length() < 21) {
+	if (name.length() >= 1 && name.length() <= 20) {
 		enterCommandMode();
 		sendString("SS," + name + "\r\n");
 		return isAOK();
@@ -278,7 +273,7 @@ bool RN41_42::setServiceName(String name) {
 //Set Remote Config Timer
 //ST,<string>
 bool RN41_42::setConfigTimer(unsigned int value) {
-	if (value >= 0 && value < 256) {
+	if (value >= 0 && value <= 255) {
 		enterCommandMode();
 		sendString("ST," + String(value) + "\r\n");
 		return isAOK();
@@ -294,32 +289,32 @@ bool RN41_42::setConfigTimer(unsigned int value) {
 bool RN41_42::setUARTBaud(unsigned int baud) {
 	unsigned int currentBaud = _baud;
 	switch (baud) {
-		case 1200:
-		case 2400:
-		case 4800:
-		case 9600:
-		case 19200:
-		case 28800:
-		case 38400:
-		case 57600:
-		case 115000:
-		case 230000:
-		case 460000:
-		case 921000:
-			enterCommandMode();
-			sendString("SU," + String(baud).substring(0,1) + "\r\n");
+	case 1200:
+	case 2400:
+	case 4800:
+	case 9600:
+	case 19200:
+	case 28800:
+	case 38400:
+	case 57600:
+	case 115000:
+	case 230000:
+	case 460000:
+	case 921000:
+		enterCommandMode();
+		sendString("SU," + String(baud).substring(0, 1) + "\r\n");
+		serial.end();
+		begin(baud);
+		if (isAOK()) {
+			return true;
+		}
+		else {
 			serial.end();
-			this->begin(baud);
-			if (isAOK()) {
-				return true;
-			}
-			else {
-				serial.end();
-				this->begin(currentBaud);
-				return false;
-			}
-		default:
+			begin(currentBaud);
 			return false;
+		}
+	default:
+		return false;
 	}
 }
 
@@ -333,7 +328,7 @@ bool RN41_42::setSniff(String hex) {
 
 //Set Bonding
 //SX,<flag>
-bool RN41_42::setBonding(bool en){
+bool RN41_42::setBonding(bool en) {
 	enterCommandMode();
 	if (en == true) {
 		sendString("SX,1\r\n");
@@ -364,11 +359,8 @@ bool RN41_42::setNonStandardBaud(unsigned int multi) {
 	enterCommandMode();
 	sendString("SZ," + String(multi) + "\r\n");
 	if (isAOK()) {
-		this->reset();
-		//Wait for reboot
-		delay(500);
 		serial.end();
-		this->begin((unsigned long)(multi / 0.004096)); //This probably won't work well
+		begin((unsigned long)(multi / 0.004096)); //This probably won't work well
 		return true;
 	}
 	else {
@@ -379,7 +371,7 @@ bool RN41_42::setNonStandardBaud(unsigned int multi) {
 //Set Profile
 //S~,<value>
 bool RN41_42::setProfile(int value) {
-	if (value >= 0 && value < 7) {
+	if (value >= 0 && value <= 6) {
 		enterCommandMode();
 		sendString("S~," + String(value) + "\r\n");
 		return isAOK();
@@ -392,7 +384,7 @@ bool RN41_42::setProfile(int value) {
 //Set Serialized Friendly Name
 //S-,<string>
 bool RN41_42::setSerializedFriendlyName(String name) {
-	if (name.length() > 0 && name.length() < 16) {
+	if (name.length() >= 1 && name.length() <= 15) {
 		enterCommandMode();
 		sendString("S-," + name + "\r\n");
 		return isAOK();
@@ -438,19 +430,16 @@ bool RN41_42::setLPConnectMode(String hex) {
 	return isAOK();
 }
 
-//Resets The Device
-//Also Exits Command Mode
-//Device Must Be Reset After A Config Change To Take Effect
-bool RN41_42::reset() {
+String RN41_42::getBasicSettings()
+{
 	enterCommandMode();
-	sendString("R,1\r\n");
-	if (getString() == "Reboot!\r\n") {
-		_commandMode = false;
-		return true;
-	}
-	else {
-		return false;
-	}
+	sendString("D\r\n");
+	return getString();
+}
+
+String RN41_42::getExtendedSettings()
+{
+	return String();
 }
 
 //Gets Bluetooth Address
@@ -462,6 +451,11 @@ String RN41_42::getBluetoothAddress() {
 	String address = result.substring(0, result.length() - 2);
 	exitCommandMode();
 	return address;
+}
+
+String RN41_42::getConnectedRemoteAddress()
+{
+	return String();
 }
 
 //Gets Connection Status
@@ -480,6 +474,16 @@ bool RN41_42::getConnectionStatus() {
 	}
 }
 
+String RN41_42::getStoredRemoteAddress()
+{
+	return String();
+}
+
+String RN41_42::getGPIOStatus()
+{
+	return String();
+}
+
 //Get The Device's Firmware Version
 String RN41_42::getFirmwareVersion() {
 	enterCommandMode();
@@ -488,6 +492,23 @@ String RN41_42::getFirmwareVersion() {
 	exitCommandMode();
 	return version;
 }
+
+//Resets The Device
+//Also Exits Command Mode
+//Device Must Be Reset After A Config Change To Take Effect
+bool RN41_42::reset() {
+	enterCommandMode();
+	sendString("R,1\r\n");
+	if (getString() == "Reboot!\r\n") {
+		_commandMode = false;
+		return true;
+	}
+	else {
+		return false;
+	}
+}
+
+
 
 bool RN41_42::connectToAddress(String address)
 {
@@ -574,10 +595,12 @@ String RN41_42::getString(char terminationChar) {
 
 bool RN41_42::isAOK() {
 	if (getString() == "AOK\r\n") {
+		exitCommandMode();
 		return true;
 	}
 	else
 	{
+		exitCommandMode();
 		return false;
 	}
 }
