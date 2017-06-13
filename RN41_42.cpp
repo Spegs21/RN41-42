@@ -15,6 +15,10 @@ RN41_42::RN41_42(HardwareSerial &_serial) : serial(_serial) {
 		pinMode(RN41_42_RESET_PIN, OUTPUT);
 		digitalWrite(RN41_42_RESET_PIN, HIGH);
     #endif // RN41_42_RESET_PIN
+	#ifdef RN41_42_CONN_PIN
+		pinMode(RN41_42_CONN_PIN, INPUT);
+		digitalWrite(RN41_42_CONN_PIN, HIGH);
+	#endif // RN41_42_CONN_PIN
 }
 
 RN41_42::RN41_42(HardwareSerial &_serial, char configChar) : serial(_serial) {
@@ -25,6 +29,10 @@ RN41_42::RN41_42(HardwareSerial &_serial, char configChar) : serial(_serial) {
 		pinMode(RN41_42_RESET_PIN, OUTPUT);
 		digitalWrite(RN41_42_RESET_PIN, HIGH);
 	#endif // RN41_42_RESET_PIN
+	#ifdef RN41_42_CONN_PIN
+		pinMode(RN41_42_CONN_PIN, INPUT);
+		digitalWrite(RN41_42_CONN_PIN, HIGH);
+	#endif // RN41_42_CONN_PIN
 }
 
 void RN41_42::begin(unsigned long baudrate)
@@ -492,20 +500,23 @@ String RN41_42::getConnectedRemoteAddress()
 //GK
 //0,0,0 = Not Connected
 //1,0,0 = Connected
+//Uses GPIO over serial commands if available
 bool RN41_42::getConnectionStatus()
 {
-#ifndef RN41_42_CONN_GPIO
-	enterCommandMode();
-	sendString("GK\r\n");
-	if (getString() == "1,0,0\r\n") {
-		exitCommandMode();
-		return true;
-	}
-	else {
-		exitCommandMode();
-		return false;
-	}
-#endif // !RN41_42_CONN_GPIO
+	#ifdef RN41_42_CONN_PIN
+		return digitalRead(RN41_42_CONN_PIN) == LOW ? true : false;
+	#else
+		enterCommandMode();
+		sendString("GK\r\n");
+		if (getString() == "1,0,0\r\n") {
+			exitCommandMode();
+			return true;
+		}
+		else {
+			exitCommandMode();
+			return false;
+		}
+	#endif // RN41_42_CONN_PIN
 }
 
 //Returns the Stored Remote Bluetooth Address
