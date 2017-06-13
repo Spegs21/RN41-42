@@ -409,7 +409,8 @@ bool RN41_42::setRoleSwitch(bool en) {
 
 //Set Configuration Character
 //S$,<char>
-bool RN41_42::setConfigChar(char c) {
+bool RN41_42::setConfigChar(char c)
+{
 	enterCommandMode();
 	sendString("S$," + String(c) + "\r\n");
 	if (isAOK()) {
@@ -424,44 +425,65 @@ bool RN41_42::setConfigChar(char c) {
 
 //Set Low-Power Connect Mode
 //S|,<value>
-bool RN41_42::setLPConnectMode(String hex) {
+bool RN41_42::setLPConnectMode(String hex)\
+{
 	enterCommandMode();
 	sendString("S|," + hex + "\r\n");
 	return isAOK();
 }
 
+//Returns the basic settings
+//D
 String RN41_42::getBasicSettings()
 {
 	enterCommandMode();
 	sendString("D\r\n");
-	return getString();
+	String res = getString();
+	exitCommandMode();
+	return res;
 }
 
+//Returns the extended settings
+//E
 String RN41_42::getExtendedSettings()
 {
-	return String();
+	enterCommandMode();
+	sendString("E\r\n");
+	String res = getString();
+	exitCommandMode();
+	return res;
 }
 
-//Gets Bluetooth Address
-//returns the 12 didgite MAC ID
-String RN41_42::getBluetoothAddress() {
+//Returns the Bluetooth Address
+//GB
+String RN41_42::getBluetoothAddress()
+{
 	enterCommandMode();
 	sendString("GB\r\n");
-	String result = getString();
-	String address = result.substring(0, result.length() - 2);
+	String res = getString();
+	res = res.substring(0, res.length() - 2);
 	exitCommandMode();
-	return address;
+	return res;
 }
 
+//Returns the Connected Device Bluetooth Address
+//GF
 String RN41_42::getConnectedRemoteAddress()
 {
-	return String();
+	enterCommandMode();
+	sendString("GF\r\n");
+	String res = getString();
+	res = res.substring(0, res.length() - 2);
+	exitCommandMode();
+	return res;
 }
 
 //Gets Connection Status
+//GK
 //0,0,0 = Not Connected
 //1,0,0 = Connected
-bool RN41_42::getConnectionStatus() {
+bool RN41_42::getConnectionStatus()
+{
 	enterCommandMode();
 	sendString("GK\r\n");
 	if (getString() == "1,0,0\r\n") {
@@ -474,14 +496,27 @@ bool RN41_42::getConnectionStatus() {
 	}
 }
 
+//Returns the Stored Remote Bluetooth Address
+//GR
 String RN41_42::getStoredRemoteAddress()
 {
-	return String();
+	enterCommandMode();
+	sendString("GR\r\n");
+	String res = getString();
+	res = res.substring(0, res.length() - 2);
+	exitCommandMode();
+	return res;
 }
 
+//Return the GPIO Bitmask
+//G&
 String RN41_42::getGPIOStatus()
 {
-	return String();
+	enterCommandMode();
+	sendString("G&\r\n");
+	String res = getString();
+	exitCommandMode();
+	return res;
 }
 
 //Get The Device's Firmware Version
@@ -516,48 +551,60 @@ bool RN41_42::connectToAddress(String address)
 }
 
 bool RN41_42::sendMessage(String message, char terminationChar) {
-	if (_commandMode) { return false; }
-	String msg = message + terminationChar;
-	serial.write(printf("%s", msg.c_str()));
-	return true;
+	if (!_commandMode) {
+		String msg = message + terminationChar;
+		serial.write(printf("%s", msg.c_str()));
+		return true;
+	}
+	else {
+		return false;
+	}
 }
 
 String RN41_42::recieveMessage(char terminationChar) {
-	return getString(terminationChar);
-	if (_commandMode) { return "*ERROR*"; }
+	if (!_commandMode) {
+		return getString(terminationChar);
+	}
+	else {
+		return "*ERROR*";
+	}
 }
 
 //Private Functions Below
 
 //Enter Command Mode
 bool RN41_42::enterCommandMode() {
-	if (_commandMode == true) {
-		return true;
-	}
-	for (int i = 0; i < 3; i++) {
-		sendString(String(_configChar));
-	}
-	if (getString() == "CMD\r\n") {
-		_commandMode = true;
-		return true;
+	if (!_commandMode) {
+		for (int i = 0; i < 3; i++) {
+			sendString(String(_configChar));
+		}
+		if (getString() == "CMD\r\n") {
+			_commandMode = true;
+			return true;
+		}
+		else {
+			return false;
+		}
 	}
 	else {
-		return false;
+		return true;
 	}
 }
 
 //Exit Command Mode
 bool RN41_42::exitCommandMode() {
-	if (_commandMode == false) {
-		return true;
-	}
-	sendString("---\r\n");
-	if (getString() == "END\r\n") {
-		_commandMode = false;
-		return true;
+	if (_commandMode) {
+		sendString("---\r\n");
+		if (getString() == "END\r\n") {
+			_commandMode = false;
+			return true;
+		}
+		else {
+			return false;
+		}
 	}
 	else {
-		return false;
+		return true;
 	}
 }
 
@@ -567,15 +614,15 @@ void RN41_42::sendString(String msg) {
 
 String RN41_42::getString() {
 	String msg = "";
-	char prev;
+//	char prev;
 	char curr;
 	while (serial.available()) {
-		prev = curr;
+//		prev = curr;
 		curr = serial.read();
 		msg += curr;
-		if (prev == '\r' && curr == '\n') {
-			break;
-		}
+//		if (prev == '\r' && curr == '\n') {
+//			break;
+//		}
 	}
 	return msg;
 }

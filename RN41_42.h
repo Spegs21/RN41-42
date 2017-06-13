@@ -94,8 +94,6 @@ class RN41_42 {
 		unsigned long _baud;
 		char _configChar;
 
-		bool res;
-
 		//Private Commands
 		bool enterCommandMode();
 		bool exitCommandMode();
