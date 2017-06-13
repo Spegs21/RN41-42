@@ -10,11 +10,21 @@
 RN41_42::RN41_42(HardwareSerial &_serial) : serial(_serial) {
 	_commandMode = false;
 	_configChar = '$';
+
+	#ifdef RN41_42_RESET_PIN
+		pinMode(RN41_42_RESET_PIN, OUTPUT);
+		digitalWrite(RN41_42_RESET_PIN, HIGH);
+    #endif // RN41_42_RESET_PIN
 }
 
 RN41_42::RN41_42(HardwareSerial &_serial, char configChar) : serial(_serial) {
 	_commandMode = false;
 	_configChar = configChar;
+
+	#ifdef RN41_42_RESET_PIN
+		pinMode(RN41_42_RESET_PIN, OUTPUT);
+		digitalWrite(RN41_42_RESET_PIN, HIGH);
+	#endif // RN41_42_RESET_PIN
 }
 
 void RN41_42::begin(unsigned long baudrate)
@@ -484,6 +494,7 @@ String RN41_42::getConnectedRemoteAddress()
 //1,0,0 = Connected
 bool RN41_42::getConnectionStatus()
 {
+#ifndef RN41_42_CONN_GPIO
 	enterCommandMode();
 	sendString("GK\r\n");
 	if (getString() == "1,0,0\r\n") {
@@ -494,6 +505,7 @@ bool RN41_42::getConnectionStatus()
 		exitCommandMode();
 		return false;
 	}
+#endif // !RN41_42_CONN_GPIO
 }
 
 //Returns the Stored Remote Bluetooth Address
@@ -530,17 +542,26 @@ String RN41_42::getFirmwareVersion() {
 
 //Resets The Device
 //Also Exits Command Mode
+//Uses GPIO over serial commands if available
 //Device Must Be Reset After A Config Change To Take Effect
-bool RN41_42::reset() {
-	enterCommandMode();
-	sendString("R,1\r\n");
-	if (getString() == "Reboot!\r\n") {
-		_commandMode = false;
+bool RN41_42::reset()
+{
+	#ifdef RN41_42_RESET_PIN
+		digitalWrite(RN41_42_RESET_PIN, LOW);
+		delay(100);
+		digitalWrite(RN41_42_RESET_PIN, HIGH);
 		return true;
-	}
-	else {
-		return false;
-	}
+	#else
+		enterCommandMode();
+		sendString("R,1\r\n");
+		if (getString() == "Reboot!\r\n") {
+			_commandMode = false;
+			return true;
+		}
+		else {
+			return false;
+		}
+	#endif // RN41_42_RESET_PIN
 }
 
 

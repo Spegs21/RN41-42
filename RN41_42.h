@@ -10,6 +10,7 @@
 #ifndef _RN41_42_h
 #define _RN41_42_h
 
+//#define RN41_42_RESET_PIN 13
 
 #if defined(ARDUINO) && ARDUINO >= 100
 	#include "arduino.h"
