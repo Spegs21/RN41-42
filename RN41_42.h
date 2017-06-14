@@ -10,8 +10,13 @@
 #ifndef _RN41_42_h
 #define _RN41_42_h
 
-//#define RN41_42_RESET_PIN
-//#define RN41_42_CONN_PIN
+//Define pin to pin connections
+  #define RN41_42_RESET  PIN_A6     //Reset
+//#define RN41_42_GPIO2  PIN_A7     //Connection State
+//#define RN41_42_GPIO3             //Auto Discovery/Pairing
+//#define RN41_42_GPIO4             //Factory Reset
+//#define RN41_42_GPIO6             //Auto-Connect
+//#define RN41_42_GPIO7             //Baud Rate
 
 #if defined(ARDUINO) && ARDUINO >= 100
 	#include "arduino.h"
@@ -28,6 +33,20 @@ class RN41_42 {
 		void begin(unsigned long baudrate);
 		void begin();
 		bool reset();
+
+		//Dipswitch/GPIO Functions
+		#ifdef RN41_42_GPIO4
+			bool factoryReset();
+		#endif // RN41_42_GPIO4
+		#ifdef RN41_42_GPIO3
+			bool autoDiscoveryPairing(bool en);
+		#endif // RN41_42_GPIO3
+		#ifdef RN41_42_GPIO6
+			bool autoConnect(bool en);
+		#endif // RN41_42_GPIO6
+		#ifdef RN41_42_GPIO7
+			bool baudRate9600(bool en);
+		#endif // RN41_42_GPIO7
 
 		//set commands
 		bool setS7(bool en);
@@ -79,7 +98,6 @@ class RN41_42 {
 		bool connectToAddress();
 		bool connectToAddress(String address);
 		bool connectToAddressFast(String address);
-
 
 
 		//Message Mode

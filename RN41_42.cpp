@@ -11,13 +11,13 @@ RN41_42::RN41_42(HardwareSerial &_serial) : serial(_serial) {
 	_commandMode = false;
 	_configChar = '$';
 
-	#ifdef RN41_42_RESET_PIN
-		pinMode(RN41_42_RESET_PIN, OUTPUT);
-		digitalWrite(RN41_42_RESET_PIN, HIGH);
+	#ifdef RN41_42_RESET
+		pinMode(RN41_42_RESET, OUTPUT);
+		digitalWrite(RN41_42_RESET, HIGH);
     #endif // RN41_42_RESET_PIN
-	#ifdef RN41_42_CONN_PIN
-		pinMode(RN41_42_CONN_PIN, INPUT);
-		digitalWrite(RN41_42_CONN_PIN, HIGH);
+	#ifdef RN41_42_GPIO2
+		pinMode(RN41_42_GPIO2, INPUT);
+		digitalWrite(RN41_42_GPIO2, HIGH);
 	#endif // RN41_42_CONN_PIN
 }
 
@@ -25,13 +25,13 @@ RN41_42::RN41_42(HardwareSerial &_serial, char configChar) : serial(_serial) {
 	_commandMode = false;
 	_configChar = configChar;
 
-	#ifdef RN41_42_RESET_PIN
-		pinMode(RN41_42_RESET_PIN, OUTPUT);
-		digitalWrite(RN41_42_RESET_PIN, HIGH);
+	#ifdef RN41_42_RESET
+		pinMode(RN41_42_RESET, OUTPUT);
+		digitalWrite(RN41_42_RESET, HIGH);
 	#endif // RN41_42_RESET_PIN
-	#ifdef RN41_42_CONN_PIN
-		pinMode(RN41_42_CONN_PIN, INPUT);
-		digitalWrite(RN41_42_CONN_PIN, HIGH);
+	#ifdef RN41_42_GPIO2
+		pinMode(RN41_42_GPIO2, INPUT);
+		digitalWrite(RN41_42_GPIO2, HIGH);
 	#endif // RN41_42_CONN_PIN
 }
 
@@ -129,9 +129,23 @@ bool RN41_42::setUUID(String hex) {
 //Restore Factory Defaults
 //SF,1
 bool RN41_42::restoreFactoryDefaults() {
-	enterCommandMode();
-	sendString("SF,1");
-	return isAOK();
+	#ifdef RN41_42_GPIO4
+		digitalWrite(RN41_42_GPIO4, HIGH);
+		reset();
+		delay(500);
+		digitalWrite(RN41_42_GPIO4, LOW);
+		delay(1000);
+		digitalWrite(RN41_42_GPIO4, HIGH);
+		digitalWrite(RN41_42_GPIO4, LOW);
+		delay(1000);
+		digitalWrite(RN41_42_GPIO4, HIGH);
+		digitalWrite(RN41_42_GPIO4, LOW);
+		reset();
+	#else
+		enterCommandMode();
+		sendString("SF,1");
+		return isAOK();
+	#endif	// RN41_42_GPIO4
 }
 
 //Set HID Flag Register
@@ -503,8 +517,8 @@ String RN41_42::getConnectedRemoteAddress()
 //Uses GPIO over serial commands if available
 bool RN41_42::getConnectionStatus()
 {
-	#ifdef RN41_42_CONN_PIN
-		return digitalRead(RN41_42_CONN_PIN) == LOW ? true : false;
+	#ifdef RN41_42_GPIO2
+		return digitalRead(RN41_42_GPIO2);
 	#else
 		enterCommandMode();
 		sendString("GK\r\n");
@@ -557,10 +571,10 @@ String RN41_42::getFirmwareVersion() {
 //Device Must Be Reset After A Config Change To Take Effect
 bool RN41_42::reset()
 {
-	#ifdef RN41_42_RESET_PIN
-		digitalWrite(RN41_42_RESET_PIN, LOW);
+	#ifdef RN41_42_RESET
+		digitalWrite(RN41_42_RESET, LOW);
 		delay(100);
-		digitalWrite(RN41_42_RESET_PIN, HIGH);
+		digitalWrite(RN41_42_RESET, HIGH);
 		return true;
 	#else
 		enterCommandMode();
