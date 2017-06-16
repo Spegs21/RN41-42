@@ -11,12 +11,12 @@
 #define _RN41_42_h
 
 //Define pin to pin connections
-  #define RN41_42_RESET  PIN_A6     //Reset
-//#define RN41_42_GPIO2  PIN_A7     //Connection State
-//#define RN41_42_GPIO3             //Auto Discovery/Pairing
-//#define RN41_42_GPIO4             //Factory Reset
-//#define RN41_42_GPIO6             //Auto-Connect
-//#define RN41_42_GPIO7             //Baud Rate
+#define RN41_42_RESET  PIN_A6     //Reset
+//#define RN41_42_GPIO2           //Connection State
+//#define RN41_42_GPIO3           //Auto Discovery/Pairing
+//#define RN41_42_GPIO4           //Factory Reset
+//#define RN41_42_GPIO6           //Auto-Connect
+//#define RN41_42_GPIO7           //Baud Rate
 
 #if defined(ARDUINO) && ARDUINO >= 100
 	#include "arduino.h"
@@ -36,16 +36,16 @@ class RN41_42 {
 
 		//Dipswitch/GPIO Functions
 		#ifdef RN41_42_GPIO4
-			bool factoryReset();
+			void factoryReset();
 		#endif // RN41_42_GPIO4
 		#ifdef RN41_42_GPIO3
-			bool autoDiscoveryPairing(bool en);
+			void autoDiscoveryPairing(bool en);
 		#endif // RN41_42_GPIO3
 		#ifdef RN41_42_GPIO6
-			bool autoConnect(bool en);
+			void autoConnect(bool en);
 		#endif // RN41_42_GPIO6
 		#ifdef RN41_42_GPIO7
-			bool baudRate9600(bool en);
+			void setBaudRate9600(bool en);
 		#endif // RN41_42_GPIO7
 
 		//set commands
@@ -117,6 +117,7 @@ class RN41_42 {
 		//Private Commands
 		bool enterCommandMode();
 		bool exitCommandMode();
+		void setupIO();
 
 		//Send Data
 		void sendString(String msg);

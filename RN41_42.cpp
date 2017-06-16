@@ -10,29 +10,13 @@
 RN41_42::RN41_42(HardwareSerial &_serial) : serial(_serial) {
 	_commandMode = false;
 	_configChar = '$';
-
-	#ifdef RN41_42_RESET
-		pinMode(RN41_42_RESET, OUTPUT);
-		digitalWrite(RN41_42_RESET, HIGH);
-    #endif // RN41_42_RESET_PIN
-	#ifdef RN41_42_GPIO2
-		pinMode(RN41_42_GPIO2, INPUT);
-		digitalWrite(RN41_42_GPIO2, HIGH);
-	#endif // RN41_42_CONN_PIN
+	setupIO();
 }
 
 RN41_42::RN41_42(HardwareSerial &_serial, char configChar) : serial(_serial) {
 	_commandMode = false;
 	_configChar = configChar;
-
-	#ifdef RN41_42_RESET
-		pinMode(RN41_42_RESET, OUTPUT);
-		digitalWrite(RN41_42_RESET, HIGH);
-	#endif // RN41_42_RESET_PIN
-	#ifdef RN41_42_GPIO2
-		pinMode(RN41_42_GPIO2, INPUT);
-		digitalWrite(RN41_42_GPIO2, HIGH);
-	#endif // RN41_42_CONN_PIN
+	setupIO();
 }
 
 void RN41_42::begin(unsigned long baudrate)
@@ -46,6 +30,46 @@ void RN41_42::begin()
 	_baud = 115200;
 	serial.begin(_baud);
 }
+
+//Dipswitch/GPIO Functions
+
+#ifdef RN41_42_GPIO4
+void RN41_42::factoryReset()
+{
+	digitalWrite(RN41_42_GPIO4, HIGH);
+	reset();
+	delay(500);
+	digitalWrite(RN41_42_GPIO4, LOW);
+	delay(1000);
+	digitalWrite(RN41_42_GPIO4, HIGH);
+	digitalWrite(RN41_42_GPIO4, LOW);
+	delay(1000);
+	digitalWrite(RN41_42_GPIO4, HIGH);
+	digitalWrite(RN41_42_GPIO4, LOW);
+	reset();
+}
+#endif // RN41_42_GPIO4
+
+#ifdef RN41_42_GPIO3
+void RN41_42::autoDiscoveryPairing(bool en)
+{
+	digitalWrite(RN41_42_GPIO3, en);
+}
+#endif // RN41_42_GPIO3
+
+#ifdef RN41_42_GPIO6
+void RN41_42::autoConnect(bool en)
+{
+	digitalWrite(RN41_42_GPIO6, en);
+}
+#endif // RN41_42_GPIO6
+
+#ifdef RN41_42_GPIO7
+void RN41_42::setBaudRate9600(bool en)
+{
+	digitalWrite(RN41_42_GPIO7, en);
+}
+#endif // RN41_42_GPIO7
 
 //SET COMMANDS
 
@@ -129,23 +153,9 @@ bool RN41_42::setUUID(String hex) {
 //Restore Factory Defaults
 //SF,1
 bool RN41_42::restoreFactoryDefaults() {
-	#ifdef RN41_42_GPIO4
-		digitalWrite(RN41_42_GPIO4, HIGH);
-		reset();
-		delay(500);
-		digitalWrite(RN41_42_GPIO4, LOW);
-		delay(1000);
-		digitalWrite(RN41_42_GPIO4, HIGH);
-		digitalWrite(RN41_42_GPIO4, LOW);
-		delay(1000);
-		digitalWrite(RN41_42_GPIO4, HIGH);
-		digitalWrite(RN41_42_GPIO4, LOW);
-		reset();
-	#else
-		enterCommandMode();
-		sendString("SF,1");
-		return isAOK();
-	#endif	// RN41_42_GPIO4
+	enterCommandMode();
+	sendString("SF,1");
+	return isAOK();
 }
 
 //Set HID Flag Register
@@ -589,8 +599,6 @@ bool RN41_42::reset()
 	#endif // RN41_42_RESET_PIN
 }
 
-
-
 bool RN41_42::connectToAddress(String address)
 {
 	return false;
@@ -654,6 +662,8 @@ bool RN41_42::exitCommandMode() {
 	}
 }
 
+
+
 void RN41_42::sendString(String msg) {
 	serial.write(printf("%s", msg.c_str()));
 }
@@ -684,6 +694,39 @@ String RN41_42::getString(char terminationChar) {
 		}
 	}
 	return msg;
+}
+
+void RN41_42::setupIO()
+{
+#ifdef RN41_42_RESET
+	pinMode(RN41_42_RESET, OUTPUT);
+	digitalWrite(RN41_42_RESET, HIGH);
+#endif // RN41_42_RESET_PIN
+
+#ifdef RN41_42_GPIO2
+	pinMode(RN41_42_GPIO2, INPUT);
+	digitalWrite(RN41_42_GPIO2, HIGH);
+#endif // RN41_42_CONN_PIN
+
+#ifdef RN41_42_GPIO4
+	pinMode(RN41_42_GPIO4, OUTPUT);
+	digitalWrite(RN41_42_GPIO4, LOW);
+#endif // RN41_42_GPIO4
+
+#ifdef RN41_42_GPIO3
+	pinMode(RN41_42_GPIO3, OUTPUT);
+	digitalWrite(RN41_42_GPIO3, LOW);
+#endif // RN41_42_GPIO3
+
+#ifdef RN41_42_GPIO6
+	pinMode(RN41_42_GPIO6, OUTPUT);
+	digitalWrite(RN41_42_GPIO6, LOW);
+#endif // RN41_42_GPIO6
+
+#ifdef RN41_42_GPIO7
+	pinMode(RN41_42_GPIO7, OUTPUT);
+	digitalWrite(RN41_42_GPIO7, LOW);
+#endif // RN41_42_GPIO
 }
 
 bool RN41_42::isAOK() {
