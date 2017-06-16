@@ -76,12 +76,15 @@ void RN41_42::setBaudRate9600(bool en)
 //Set 7-bit Data Mode
 //S7,<flag>
 bool RN41_42::setS7(bool en) {
+	emptyBuffer();
 	enterCommandMode();
 	if (en == true) {
-		sendString(F("S7,1\r\n"));
+		strcpy_P(buf, PSTR("S7,1\r\n"));
+		sendString(buf);
 	}
 	else {
-		sendString(F("S7,0\r\n"));
+		strcpy_P(buf, PSTR("S7,0\r\n"));
+		sendString(buf);
 	}
 	return isAOK();
 }
@@ -98,7 +101,7 @@ bool RN41_42::setAuthenticationMode(int authMode) {
 	if (authMode >= 0 && authMode <= 4 && authMode != 3) {
 		enterCommandMode();
 		emptyBuffer();
-		sprintf(buf, "SA,%d\r\n", authMode);
+		sprintf_P(buf, PSTR("SA,%d\r\n"), authMode);
 		sendString(buf);
 		return isAOK();
 	}
@@ -114,7 +117,7 @@ bool RN41_42::setBreak(int breakVal) {
 	if (breakVal >= 1 && breakVal <= 6) {
 		enterCommandMode();
 		emptyBuffer();
-		sprintf(buf, "SB,%d\r\n", breakVal);
+		sprintf_P(buf, PSTR("SB,%d\r\n"), breakVal);
 		sendString(buf);
 		return isAOK();
 	}
@@ -129,7 +132,7 @@ bool RN41_42::setBreak(int breakVal) {
 bool RN41_42::setServiceClass(char hex[4]) {
 	enterCommandMode();
 	emptyBuffer();
-	sprintf(buf, "SC,%s\r\n", hex);
+	sprintf_P(buf, PSTR("SC,%s\r\n"), hex);
 	sendString(buf);
 	return isAOK();
 }
@@ -139,7 +142,7 @@ bool RN41_42::setServiceClass(char hex[4]) {
 bool RN41_42::setDeviceClass(char hex[4]) {
 	enterCommandMode();
 	emptyBuffer();
-	sprintf(buf, "SD,%s\r\n", hex);
+	sprintf_P(buf, PSTR("SD,%s\r\n"), hex);
 	sendString(buf);
 	return isAOK();
 }
@@ -149,7 +152,7 @@ bool RN41_42::setDeviceClass(char hex[4]) {
 bool RN41_42::setUUID(char hex[32]) {
 	enterCommandMode();
 	emptyBuffer();
-	sprintf(buf, "SE,%s\r\n", hex);
+	sprintf_P(buf, PSTR("SE,%s\r\n"), hex);
 	sendString(buf);
 	return isAOK();
 }
@@ -158,7 +161,9 @@ bool RN41_42::setUUID(char hex[32]) {
 //SF,1
 bool RN41_42::restoreFactoryDefaults() {
 	enterCommandMode();
-	sendString("SF,1\r\n");
+	emptyBuffer();
+	strcpy_P(buf, PSTR("SF,1\r\n"));
+	sendString(buf);
 	return isAOK();
 }
 
@@ -167,7 +172,7 @@ bool RN41_42::restoreFactoryDefaults() {
 bool RN41_42::setHIDRegister(char hex[4]) {
 	enterCommandMode();
 	emptyBuffer();
-	sprintf(buf, "SH,%s\r\n", hex);
+	sprintf_P(buf, PSTR("SH,%s\r\n"), hex);
 	sendString(buf);
 	return isAOK();
 }
@@ -177,7 +182,7 @@ bool RN41_42::setHIDRegister(char hex[4]) {
 bool RN41_42::setInquiryScanWindow(char hex[4]) {
 	enterCommandMode();
 	emptyBuffer();
-	sprintf(buf, "SI,%s\r\n", hex);
+	sprintf_P(buf, PSTR("SI,%s\r\n"), hex);
 	sendString(buf);
 	return isAOK();
 }
@@ -187,7 +192,7 @@ bool RN41_42::setInquiryScanWindow(char hex[4]) {
 bool RN41_42::setPageScanWindow(char hex[4]) {
 	enterCommandMode();
 	emptyBuffer();
-	sprintf(buf, "SJ,%s\r\n", hex);
+	sprintf_P(buf, PSTR("SJ,%s\r\n"), hex);
 	sendString(buf);
 	return isAOK();
 }
@@ -198,7 +203,7 @@ bool RN41_42::setUARTParity(char parity) {
 	if (parity == 'E' || parity == 'O' || parity == 'N') {
 		enterCommandMode();
 		emptyBuffer();
-		sprintf(buf, "SL,%s\r\n", parity);
+		sprintf_P(buf, PSTR("SL,%s\r\n"), parity);
 		sendString(buf);
 		return isAOK();
 	}
@@ -222,7 +227,7 @@ bool RN41_42::setMode(int mode) {
 	if (mode >= 0 && mode <= 6) {
 		enterCommandMode();
 		emptyBuffer();
-		sprintf(buf, "SM,%d\r\n", mode);
+		sprintf_P(buf, PSTR("SM,%d\r\n"), mode);
 		sendString(buf);
 		return isAOK();
 	}
@@ -238,7 +243,7 @@ bool RN41_42::setMode(int mode) {
 bool RN41_42::setDeviceName(char name[20]) {
 	enterCommandMode();
 	emptyBuffer();
-	sprintf(buf, "SN,%s\r\n", name);
+	sprintf_P(buf, PSTR("SN,%s\r\n"), name);
 	sendString(buf);
 	return isAOK();
 }
@@ -249,7 +254,7 @@ bool RN41_42::setDeviceName(char name[20]) {
 bool RN41_42::setExtendedStatusString(char name[8]) {
 	enterCommandMode();
 	emptyBuffer();
-	sprintf(buf, "SO,%s\r\n", name);
+	sprintf_P(buf, PSTR("SO,%s\r\n"), name);
 	sendString(buf);
 	return isAOK();
 }
@@ -259,7 +264,7 @@ bool RN41_42::setExtendedStatusString(char name[8]) {
 bool RN41_42::setPinCode(char pin[4]) {
 	enterCommandMode();
 	emptyBuffer();
-	sprintf(buf, "SP,%s\r\n", pin);
+	sprintf_P(buf, PSTR("SP,%s\r\n"), pin);
 	sendString(buf);
 	return isAOK();
 }
@@ -276,7 +281,7 @@ bool RN41_42::setMask(unsigned int mask) {
 	case 128:
 	case 256:
 		enterCommandMode();
-		sprintf(buf, "SQ,%d\r\n", mask);
+		sprintf_P(buf, PSTR("SQ,%d\r\n"), mask);
 		sendString(buf);
 		return isAOK();
 	default:
@@ -289,7 +294,7 @@ bool RN41_42::setMask(unsigned int mask) {
 bool RN41_42::setRemoteAddress(char address[12]) {
 	enterCommandMode();
 	emptyBuffer();
-	sprintf(buf, "SR,%s\r\n", address);
+	sprintf_P(buf, PSTR("SR,%s\r\n"), address);
 	sendString(buf);
 	return isAOK();
 }
@@ -298,7 +303,9 @@ bool RN41_42::setRemoteAddress(char address[12]) {
 //SR,Z
 bool RN41_42::eraseRemoteAddress() {
 	enterCommandMode();
-	sendString(F("SR,Z\r\n"));
+	emptyBuffer();
+	strcpy_P(buf, PSTR("SR,Z\r\n"));
+	sendString(buf);
 	return isAOK();
 }
 
@@ -306,7 +313,9 @@ bool RN41_42::eraseRemoteAddress() {
 //SR,I
 bool RN41_42::setRemoteAddressLastObserved() {
 	enterCommandMode();
-	sendString(F("SR,I\r\n"));
+	emptyBuffer();
+	strcpy_P(buf, PSTR("SR,I\r\n"));
+	sendString(buf);
 	return isAOK();
 }
 
@@ -315,7 +324,7 @@ bool RN41_42::setRemoteAddressLastObserved() {
 bool RN41_42::setServiceName(char name[20]) {
 	enterCommandMode();
 	emptyBuffer();
-	sprintf(buf, "SS,%s\r\n", name);
+	sprintf_P(buf, PSTR("SS,%s\r\n"), name);
 	sendString(buf);
 	return isAOK();
 }
@@ -326,7 +335,7 @@ bool RN41_42::setConfigTimer(unsigned int value) {
 	if (value >= 0 && value <= 255) {
 		enterCommandMode();
 		emptyBuffer();
-		sprintf(buf, "SQ,%d\r\n", value);
+		sprintf_P(buf, PSTR("SQ,%d\r\n"), value);
 		sendString(buf);
 		return isAOK();
 	}
@@ -337,36 +346,26 @@ bool RN41_42::setConfigTimer(unsigned int value) {
 
 //Set UART Baud
 //SU,<value>
-//Full baudrate required so it can be changed on the microcontroller side too.
 bool RN41_42::setUARTBaud(unsigned int baud) {
 	unsigned int currentBaud = _baud;
 	emptyBuffer();
 	switch (baud) {
-	case 1200:
-	case 2400:
-	case 4800:
-	case 9600:
-	case 19200:
-	case 28800:
-	case 38400:
-	case 57600:
-	case 115000:
-	case 230000:
-	case 460000:
-	case 921000:
+	case 12:
+	case 24:
+	case 48:
+	case 96:
+	case 19:
+	case 28:
+	case 38:
+	case 57:
+	case 11:
+	case 23:
+	case 46:
+	case 92:
 		enterCommandMode();
-		sprintf(buf, "SQ,%d\r\n", baud);
+		sprintf_P(buf, PSTR("SQ,%d\r\n"), baud);
 		sendString(buf);
-		serial.end();
-		begin(baud);
-		if (isAOK()) {
-			return true;
-		}
-		else {
-			serial.end();
-			begin(currentBaud);
-			return false;
-		}
+		return isAOK();
 	default:
 		return false;
 	}
@@ -377,7 +376,7 @@ bool RN41_42::setUARTBaud(unsigned int baud) {
 bool RN41_42::setSniff(char hex[4]) {
 	enterCommandMode();
 	emptyBuffer();
-	sprintf(buf, "SW,%s\r\n", hex);
+	sprintf_P(buf, PSTR("SW,%s\r\n"), hex);
 	sendString(buf);
 	return isAOK();
 }
@@ -385,12 +384,15 @@ bool RN41_42::setSniff(char hex[4]) {
 //Set Bonding
 //SX,<flag>
 bool RN41_42::setBonding(bool en) {
+	emptyBuffer();
 	enterCommandMode();
 	if (en == true) {
-		sendString(F("SX,1\r\n"));
+		strcpy_P(buf, PSTR("SX,1\r\n"));
+		sendString(buf);
 	}
 	else {
-		sendString(F("SX,0\r\n"));
+		strcpy_P(buf, PSTR("SX,0\r\n"));
+		sendString(buf);
 	}
 	return	isAOK();
 }
@@ -401,7 +403,7 @@ bool RN41_42::setTransmitPower(char hex[4]) {
 //	if (hex == "0010" || hex == "000C" || hex == "0008" || hex == "0004" || hex == "0000" || hex == "FFFC" || hex == "FFF8" || hex == "FFF4") {
 	enterCommandMode();
 	emptyBuffer();
-	sprintf(buf, "SY,%s\r\n", hex);
+	sprintf_P(buf, PSTR("SY,%s\r\n"), hex);
 	sendString(buf);
 	return isAOK();
 //	}
@@ -412,21 +414,12 @@ bool RN41_42::setTransmitPower(char hex[4]) {
 
 //Set Non-Standard Baud
 //SZ,<value>
-//Takes effect on reboot
 bool RN41_42::setNonStandardBaud(unsigned int multi) {
 	enterCommandMode();
 	emptyBuffer();
-	sprintf(buf, "SZ,%d\r\n", multi);
+	sprintf_P(buf, PSTR("SZ,%d\r\n"), multi);
 	sendString(buf);
 	return isAOK();
-	if (isAOK()) {
-		serial.end();
-		begin((unsigned long)(multi / 0.004096)); //This probably won't work well
-		return true;
-	}
-	else {
-		return false;
-	}
 }
 
 //Set Profile
@@ -435,7 +428,7 @@ bool RN41_42::setProfile(int value) {
 	if (value >= 0 && value <= 6) {
 		enterCommandMode();
 		emptyBuffer();
-		sprintf(buf, "S~,%d\r\n", value);
+		sprintf_P(buf, PSTR("S~,%d\r\n"), value);
 		sendString(buf);
 		return isAOK();
 	}
@@ -449,7 +442,7 @@ bool RN41_42::setProfile(int value) {
 bool RN41_42::setSerializedFriendlyName(char name[15]) {
 	enterCommandMode();
 	emptyBuffer();
-	sprintf(buf, "S-,%s\r\n", name);
+	sprintf_P(buf, PSTR("S-,%s\r\n"), name);
 	sendString(buf);
 	return isAOK();
 }
@@ -458,11 +451,14 @@ bool RN41_42::setSerializedFriendlyName(char name[15]) {
 //S?,<flag>
 bool RN41_42::setRoleSwitch(bool en) {
 	enterCommandMode();
+	emptyBuffer();
 	if (en == true) {
-		sendString(F("S?,1\r\n"));
+		strcpy_P(buf, PSTR("S?,1\r\n"));
+		sendString(buf);
 	}
 	else {
-		sendString(F("S?,0\r\n"));
+		strcpy_P(buf, PSTR("S?,0\r\n"));
+		sendString(buf);
 	}
 	return	isAOK();
 }
@@ -473,7 +469,7 @@ bool RN41_42::setConfigChar(char c)
 {
 	enterCommandMode();
 	emptyBuffer();
-	sprintf(buf, "SL,%s\r\n", c);
+	sprintf_P(buf, PSTR("SL,%s\r\n"), c);
 	sendString(buf);
 	if (isAOK()) {
 		_configChar[0] = c;
@@ -491,7 +487,7 @@ bool RN41_42::setLPConnectMode(char hex[4])
 {
 	enterCommandMode();
 	emptyBuffer();
-	sprintf(buf, "S|,%s\r\n", hex);
+	sprintf_P(buf, PSTR("S|,%s\r\n"), hex);
 	sendString(buf);
 	return isAOK();
 }
@@ -501,7 +497,9 @@ bool RN41_42::setLPConnectMode(char hex[4])
 char *RN41_42::getBasicSettings()
 {
 	enterCommandMode();
-	sendString(F("D\r\n"));
+	emptyBuffer();
+	strcpy_P(buf, PSTR("D\r\n"));
+	sendString(buf);
 	getString();
 	exitCommandMode();
 	return buf;
@@ -512,7 +510,9 @@ char *RN41_42::getBasicSettings()
 char *RN41_42::getExtendedSettings()
 {
 	enterCommandMode();
-	sendString(F("E\r\n"));
+	emptyBuffer();
+	strcpy_P(buf, PSTR("E\r\n"));
+	sendString(buf);
 	getString();
 	exitCommandMode();
 	return buf;
@@ -523,7 +523,9 @@ char *RN41_42::getExtendedSettings()
 char *RN41_42::getBluetoothAddress()
 {
 	enterCommandMode();
-	sendString(F("GB\r\n"));
+	emptyBuffer();
+	strcpy_P(buf, PSTR("GB\r\n"));
+	sendString(buf);
 	getString();
 	exitCommandMode();
 	return buf;
@@ -534,7 +536,9 @@ char *RN41_42::getBluetoothAddress()
 char *RN41_42::getConnectedRemoteAddress()
 {
 	enterCommandMode();
-	sendString(F("GF\r\n"));
+	emptyBuffer();
+	strcpy_P(buf, PSTR("GF\r\n"));
+	sendString(buf);
 	getString();
 	exitCommandMode();
 	return buf;
@@ -551,8 +555,10 @@ bool RN41_42::getConnectionStatus()
 		return digitalRead(RN41_42_GPIO2);
 	#else
 		enterCommandMode();
-		sendString(F("GK\r\n"));
-		if (strcmp(getString(),"1,0,0\r\n")==0) {
+		emptyBuffer();
+		strcpy_P(buf, PSTR("GK\r\n"));
+		sendString(buf);
+		if (strcmp_P(getString(), PSTR("1,0,0\r\n"))==0) {
 			exitCommandMode();
 			return true;
 		}
@@ -568,10 +574,12 @@ bool RN41_42::getConnectionStatus()
 char  *RN41_42::getStoredRemoteAddress()
 {
 	enterCommandMode();
-	sendString(F("GR\r\n"));
-	char *res = getString();
+	emptyBuffer();
+	strcpy_P(buf, PSTR("GR\r\n"));
+	sendString(buf);
+	getString();
 	exitCommandMode();
-	return res;
+	return buf;
 }
 
 //Return the GPIO Bitmask
@@ -579,19 +587,23 @@ char  *RN41_42::getStoredRemoteAddress()
 char *RN41_42::getGPIOStatus()
 {
 	enterCommandMode();
-	sendString(F("G&\r\n"));
-	char *res = getString();
+	emptyBuffer();
+	strcpy_P(buf, PSTR("G&\r\n"));
+	sendString(buf);
+	getString();
 	exitCommandMode();
-	return res;
+	return buf;
 }
 
 //Get The Device's Firmware Version
 char *RN41_42::getFirmwareVersion() {
 	enterCommandMode();
-	sendString(F("V\r\n"));
-	char *version = getString();
+	emptyBuffer();
+	strcpy_P(buf, PSTR("V\r\n"));
+	sendString(buf);
+	getString();
 	exitCommandMode();
-	return version;
+	return buf;
 }
 
 //Resets The Device
@@ -607,8 +619,10 @@ bool RN41_42::reset()
 		return true;
 	#else
 		enterCommandMode();
-		sendString(F("R,1\r\n"));
-		if (strcmp(getString(),"Reboot!\r\n")==0) {
+		emptyBuffer();
+		strcpy_P(buf, PSTR("R,1\r\n"));
+		sendString(buf);
+		if (strcmp_P(getString(), PSTR("Reboot!\r\n"))==0) {
 			_commandMode = false;
 			return true;
 		}
@@ -626,7 +640,7 @@ bool RN41_42::connectToAddress(char address[12])
 bool RN41_42::sendMessage(char message[32], char terminationChar) {
 	if (!_commandMode) {
 		emptyBuffer();
-		sprintf(buf, "%s%s", message, terminationChar);
+		sprintf_P(buf, PSTR("%s%s"), message, terminationChar);
 		serial.write(buf);
 		return true;
 	}
@@ -652,7 +666,7 @@ bool RN41_42::enterCommandMode() {
 		for (int i = 0; i < 3; i++) {
 			sendString(_configChar);
 		}
-		if (strcmp(getString(),"CMD\r\n")==0) {
+		if (strcmp_P(getString(), PSTR("CMD\r\n"))==0) {
 			_commandMode = true;
 			return true;
 		}
@@ -668,8 +682,10 @@ bool RN41_42::enterCommandMode() {
 //Exit Command Mode
 bool RN41_42::exitCommandMode() {
 	if (_commandMode) {
-		sendString(F("---\r\n"));
-		if (strcmp(getString(),"END\r\n")==0) {
+		emptyBuffer();
+		strcpy_P(buf, PSTR("---\r\n"));
+		sendString(buf);
+		if (strcmp_P(getString(), PSTR("END\r\n"))==0) {
 			_commandMode = false;
 			return true;
 		}
@@ -682,12 +698,7 @@ bool RN41_42::exitCommandMode() {
 	}
 }
 
-void RN41_42::sendString(char msg[]) {
-	serial.print(msg);
-}
-
-void RN41_42::sendString(const __FlashStringHelper * msg)
-{
+void RN41_42::sendString(char * msg) {
 	serial.print(msg);
 }
 
@@ -743,7 +754,7 @@ void RN41_42::emptyBuffer()
 }
 
 bool RN41_42::isAOK() {
-	if (strcmp(getString(),"AOK\r\n")==0) {
+	if (strcmp_P(getString(), PSTR("AOK\r\n"))==0) {
 		exitCommandMode();
 		return true;
 	}

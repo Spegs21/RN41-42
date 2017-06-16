@@ -10,6 +10,8 @@
 #ifndef _RN41_42_h
 #define _RN41_42_h
 
+#define PGMT( pgm_ptr ) ( reinterpret_cast< const __FlashStringHelper * >( pgm_ptr ) )
+
 //Define pin to pin connections
 #define RN41_42_RESET  PIN_A6     //Reset
 //#define RN41_42_GPIO2           //Connection State
@@ -121,8 +123,7 @@ class RN41_42 {
 		void emptyBuffer();
 
 		//Send Data
-		void sendString(char msg[]);
-		void sendString(const __FlashStringHelper* msg);
+		void sendString(char *msg);
 		char *getString();
 		bool isAOK();
 	};
