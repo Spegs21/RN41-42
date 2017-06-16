@@ -10,8 +10,6 @@
 #ifndef _RN41_42_h
 #define _RN41_42_h
 
-#define PGMT( pgm_ptr ) ( reinterpret_cast< const __FlashStringHelper * >( pgm_ptr ) )
-
 //Define pin to pin connections
 #define RN41_42_RESET  PIN_A6     //Reset
 //#define RN41_42_GPIO2           //Connection State
@@ -49,7 +47,7 @@ class RN41_42 {
 		#ifdef RN41_42_GPIO7
 			void setBaudRate9600(bool en);
 		#endif // RN41_42_GPIO7
-
+		
 		//set commands
 		bool setS7(bool en);
 		bool setAuthenticationMode(int authMode);
@@ -93,17 +91,39 @@ class RN41_42 {
 		bool getConnectionStatus();
 		char *getStoredRemoteAddress();
 		char *getGPIOStatus();
-		char *getFirmwareVersion();
 
 		//action commands
 		char *displayDipwitchValues();
 		bool connectToAddress();
 		bool connectToAddress(char address[12]);
 		bool connectToAddressFast(char address[12]);
-
+		bool connectToLastFoundAddressFast();
+		bool connectToStoredRemoteAddressFast();
+		bool connectToAddressTimed(char address[12],byte time);
+		bool fastDataMode();
+		char *help();
+		char *performInquiryScan(byte time);
+		char *performInquiryScan(byte time, char cod[6]);
+		char *performInquiryScanNN(byte time);
+		char *performInquiryScanNN(byte time, char cod[6]);
+		char *scanRSSI();
+		char *performRovingInquiryScan(byte time);
+		char *performCableReplaceInquiryScan(byte time);
+		bool hidePIN();
+		bool killConnection();
+		char *linkQuality();
+		char *remoteModemSignalStatus();
+		char *otherSettings();
+		void passMessage(char[32]);
+		bool quietMode();
+		bool passThrough(bool en);
+		bool uartChangeTemp(char baud[4], char parity);
+		char *getFirmwareVersion();
+		bool enableDiscoveryConnection();
+		bool sleep();
 
 		//Message Mode
-		bool sendMessage(char message[32], char terminationChar);
+		bool sendMessage(char message[32]);
 		char *recieveMessage();
 
 	private:

@@ -75,17 +75,12 @@ void RN41_42::setBaudRate9600(bool en)
 
 //Set 7-bit Data Mode
 //S7,<flag>
-bool RN41_42::setS7(bool en) {
-	emptyBuffer();
+bool RN41_42::setS7(bool en) 
+{
 	enterCommandMode();
-	if (en == true) {
-		strcpy_P(buf, PSTR("S7,1\r\n"));
-		sendString(buf);
-	}
-	else {
-		strcpy_P(buf, PSTR("S7,0\r\n"));
-		sendString(buf);
-	}
+	emptyBuffer();
+	sprintf_P(buf, PSTR("S7,%d\r\n"),(int)en);
+	sendString(buf);
 	return isAOK();
 }
 
@@ -383,33 +378,23 @@ bool RN41_42::setSniff(char hex[4]) {
 
 //Set Bonding
 //SX,<flag>
-bool RN41_42::setBonding(bool en) {
-	emptyBuffer();
+bool RN41_42::setBonding(bool en)
+{
 	enterCommandMode();
-	if (en == true) {
-		strcpy_P(buf, PSTR("SX,1\r\n"));
-		sendString(buf);
-	}
-	else {
-		strcpy_P(buf, PSTR("SX,0\r\n"));
-		sendString(buf);
-	}
-	return	isAOK();
+	emptyBuffer();
+	sprintf_P(buf, PSTR("SX,%d\r\n"), (int)en);
+	sendString(buf);
+	return isAOK();
 }
 
 //Set Transmit Power
 //SY,<hex value>
 bool RN41_42::setTransmitPower(char hex[4]) {
-//	if (hex == "0010" || hex == "000C" || hex == "0008" || hex == "0004" || hex == "0000" || hex == "FFFC" || hex == "FFF8" || hex == "FFF4") {
 	enterCommandMode();
 	emptyBuffer();
 	sprintf_P(buf, PSTR("SY,%s\r\n"), hex);
 	sendString(buf);
 	return isAOK();
-//	}
-//	else {
-//		return false;
-//	}
 }
 
 //Set Non-Standard Baud
@@ -449,18 +434,13 @@ bool RN41_42::setSerializedFriendlyName(char name[15]) {
 
 //Set Roll Switch
 //S?,<flag>
-bool RN41_42::setRoleSwitch(bool en) {
+bool RN41_42::setRoleSwitch(bool en)
+{
 	enterCommandMode();
 	emptyBuffer();
-	if (en == true) {
-		strcpy_P(buf, PSTR("S?,1\r\n"));
-		sendString(buf);
-	}
-	else {
-		strcpy_P(buf, PSTR("S?,0\r\n"));
-		sendString(buf);
-	}
-	return	isAOK();
+	sprintf_P(buf, PSTR("S?,%d\r\n"), (int)en);
+	sendString(buf);
+	return isAOK();
 }
 
 //Set Configuration Character
@@ -637,10 +617,10 @@ bool RN41_42::connectToAddress(char address[12])
 	return false;
 }
 
-bool RN41_42::sendMessage(char message[32], char terminationChar) {
+bool RN41_42::sendMessage(char message[32]) {
 	if (!_commandMode) {
 		emptyBuffer();
-		sprintf_P(buf, PSTR("%s%s"), message, terminationChar);
+		sprintf_P(buf, PSTR("%s"), message);
 		serial.write(buf);
 		return true;
 	}
@@ -747,7 +727,7 @@ void RN41_42::setupIO()
 
 void RN41_42::emptyBuffer()
 {
-	for (int i = 0; i <= 38; i++)
+	for (int i = 0; i < sizeof(buf)/sizeof(buf[0]); i++)
 	{
 		buf[i] = { '\0' };
 	}
