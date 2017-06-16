@@ -52,77 +52,78 @@ class RN41_42 {
 		bool setS7(bool en);
 		bool setAuthenticationMode(int authMode);
 		bool setBreak(int breakVal);
-		bool setServiceClass(String hex);
-		bool setDeviceClass(String hex);
-		bool setUUID(String hex);
+		bool setServiceClass(char hex[4]);
+		bool setDeviceClass(char hex[4]);
+		bool setUUID(char hex[32]);
 		bool restoreFactoryDefaults();
-		bool setHIDRegister(String hex);
-		bool setInquiryScanWindow(String hex);
-		bool setPageScanWindow(String hex);
+		bool setHIDRegister(char hex[4]);
+		bool setInquiryScanWindow(char hex[4]);
+		bool setPageScanWindow(char hex[4]);
 		bool setUARTParity(char parity);
 		bool setMode(int mode);
-		bool setDeviceName(String name);
-		bool setExtendedStatusString(String string);
-		bool setPinCode(String pin);
+		bool setDeviceName(char name[20]);
+		bool setExtendedStatusString(char name[8]);
+		bool setPinCode(char pin[4]);
 		bool setMask(unsigned int mask);
-		bool setRemoteAddress(String address);
+		bool setRemoteAddress(char address[12]);
 		bool eraseRemoteAddress();
 
 		bool setRemoteAddressLastObserved();
-		bool setServiceName(String name);
+		bool setServiceName(char name[20]);
 
 		bool setConfigTimer(unsigned int value);
 		bool setUARTBaud(unsigned int baud);
-		bool setSniff(String hex);
+		bool setSniff(char hex[4]);
 		bool setBonding(bool en);
-		bool setTransmitPower(String hex);
+		bool setTransmitPower(char hex[4]);
 		bool setNonStandardBaud(unsigned int multi);
 		bool setProfile(int value);
-		bool setSerializedFriendlyName(String name);
+		bool setSerializedFriendlyName(char name[15]);
 		bool setRoleSwitch(bool en);
 		bool setConfigChar(char c);
-		bool setLPConnectMode(String hex);
+		bool setLPConnectMode(char hex[4]);
 
 		//get commands
-		String getBasicSettings();
-		String getExtendedSettings();
-		String getBluetoothAddress();
-		String getConnectedRemoteAddress();
+		char *getBasicSettings();
+		char *getExtendedSettings();
+		char *getBluetoothAddress();
+		char *getConnectedRemoteAddress();
 		bool getConnectionStatus();
-		String getStoredRemoteAddress();
-		String getGPIOStatus();
-		String getFirmwareVersion();
+		char *getStoredRemoteAddress();
+		char *getGPIOStatus();
+		char *getFirmwareVersion();
 
 		//action commands
-		String displayDipwitchValues();
+		char *displayDipwitchValues();
 		bool connectToAddress();
-		bool connectToAddress(String address);
-		bool connectToAddressFast(String address);
+		bool connectToAddress(char address[12]);
+		bool connectToAddressFast(char address[12]);
 
 
 		//Message Mode
-		bool sendMessage(String message, char terminationChar);
-		String recieveMessage(char terminationChar);
+		bool sendMessage(char message[32], char terminationChar);
+		char *recieveMessage();
 
 	private:
 
 		HardwareSerial &serial;
 
 		//Vaiables
-
+		char buf[32];
 		bool _commandMode;
 		unsigned long _baud;
-		char _configChar;
+		char _configChar[1];
 
 		//Private Commands
 		bool enterCommandMode();
 		bool exitCommandMode();
 		void setupIO();
+		void emptyBuffer();
 
 		//Send Data
-		void sendString(String msg);
-		String getString();
-		String getString(char terminationChar);
+		void sendString(char msg[]);
+		void sendString(const __FlashStringHelper* msg);
+		char *getString();
 		bool isAOK();
 	};
 
