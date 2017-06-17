@@ -52,13 +52,13 @@ class RN41_42 {
 		bool setS7(bool en);
 		bool setAuthenticationMode(int authMode);
 		bool setBreak(int breakVal);
-		bool setServiceClass(char hex[4]);
-		bool setDeviceClass(char hex[4]);
+		bool setServiceClass(int hex);
+		bool setDeviceClass(int hex);
 		bool setUUID(char hex[32]);
 		bool restoreFactoryDefaults();
-		bool setHIDRegister(char hex[4]);
-		bool setInquiryScanWindow(char hex[4]);
-		bool setPageScanWindow(char hex[4]);
+		bool setHIDRegister(int hex);
+		bool setInquiryScanWindow(int hex);
+		bool setPageScanWindow(int hex);
 		bool setUARTParity(char parity);
 		bool setMode(int mode);
 		bool setDeviceName(char name[20]);
@@ -73,15 +73,15 @@ class RN41_42 {
 
 		bool setConfigTimer(unsigned int value);
 		bool setUARTBaud(unsigned int baud);
-		bool setSniff(char hex[4]);
+		bool setSniff(int hex);
 		bool setBonding(bool en);
-		bool setTransmitPower(char hex[4]);
+		bool setTransmitPower(int hex);
 		bool setNonStandardBaud(unsigned int multi);
 		bool setProfile(int value);
 		bool setSerializedFriendlyName(char name[15]);
 		bool setRoleSwitch(bool en);
 		bool setConfigChar(char c);
-		bool setLPConnectMode(char hex[4]);
+		bool setLPConnectMode(int hex);
 
 		//get commands
 		char *getBasicSettings();
@@ -120,7 +120,7 @@ class RN41_42 {
 		bool uartChangeTemp(char baud[4], char parity);
 		char *getFirmwareVersion();
 		bool enableDiscoveryConnection();
-		bool sleep();
+		void sleep();
 
 		//Message Mode
 		bool sendMessage(char message[32]);
@@ -131,7 +131,7 @@ class RN41_42 {
 		HardwareSerial &serial;
 
 		//Vaiables
-		char buf[32];
+		char recvBuf[32];
 		bool _commandMode;
 		unsigned long _baud;
 		char _configChar[1];
@@ -140,13 +140,12 @@ class RN41_42 {
 		bool enterCommandMode();
 		bool exitCommandMode();
 		void setupIO();
-		void emptyBuffer();
-		char *buildSString(char cmd);
+		char *buildHex4SString(char cmd);
 		char *buildSString(const PROGMEM char* cmd, bool str);
 
 		//Send Data
-		void sendString(char *msg);
 		char *getString();
+		char *getString(char *buffer);
 		bool isAOK();
 	};
 
