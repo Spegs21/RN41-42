@@ -7,6 +7,12 @@
 
 #include "RN41_42.h"
 
+const char s PROGMEM = 'S';
+const char commaPercent[] PROGMEM = ",%";
+const char pgmStr[] PROGMEM = "s";
+const char pgmDec[] PROGMEM = "d";
+const char term[] PROGMEM = "\n\r";
+
 RN41_42::RN41_42(HardwareSerial &_serial) : serial(_serial) {
 	_commandMode = false;
 	_configChar[0] = '$';
@@ -78,8 +84,7 @@ void RN41_42::setBaudRate9600(bool en)
 bool RN41_42::setS7(bool en) 
 {
 	enterCommandMode();
-	emptyBuffer();
-	sprintf_P(buf, PSTR("S7,%d\r\n"),(int)en);
+	sprintf(buf, buildSString(PSTR("7"),false),(int)en);
 	sendString(buf);
 	return isAOK();
 }
@@ -95,8 +100,7 @@ bool RN41_42::setS7(bool en)
 bool RN41_42::setAuthenticationMode(int authMode) {
 	if (authMode >= 0 && authMode <= 4 && authMode != 3) {
 		enterCommandMode();
-		emptyBuffer();
-		sprintf_P(buf, PSTR("SA,%d\r\n"), authMode);
+		sprintf(buf, buildSString(PSTR("A"), false), authMode);
 		sendString(buf);
 		return isAOK();
 	}
@@ -111,8 +115,7 @@ bool RN41_42::setAuthenticationMode(int authMode) {
 bool RN41_42::setBreak(int breakVal) {
 	if (breakVal >= 1 && breakVal <= 6) {
 		enterCommandMode();
-		emptyBuffer();
-		sprintf_P(buf, PSTR("SB,%d\r\n"), breakVal);
+		sprintf(buf, buildSString(PSTR("B"), false), breakVal);
 		sendString(buf);
 		return isAOK();
 	}
@@ -126,8 +129,7 @@ bool RN41_42::setBreak(int breakVal) {
 //SC,<value>
 bool RN41_42::setServiceClass(char hex[4]) {
 	enterCommandMode();
-	emptyBuffer();
-	sprintf_P(buf, PSTR("SC,%s\r\n"), hex);
+	sprintf(buf, buildSString(PSTR("C"), true), hex);
 	sendString(buf);
 	return isAOK();
 }
@@ -136,8 +138,7 @@ bool RN41_42::setServiceClass(char hex[4]) {
 //SD,<value>
 bool RN41_42::setDeviceClass(char hex[4]) {
 	enterCommandMode();
-	emptyBuffer();
-	sprintf_P(buf, PSTR("SD,%s\r\n"), hex);
+	sprintf(buf, buildSString(PSTR("D"), true), hex);
 	sendString(buf);
 	return isAOK();
 }
@@ -146,8 +147,7 @@ bool RN41_42::setDeviceClass(char hex[4]) {
 //SE,<value>
 bool RN41_42::setUUID(char hex[32]) {
 	enterCommandMode();
-	emptyBuffer();
-	sprintf_P(buf, PSTR("SE,%s\r\n"), hex);
+	sprintf(buf, buildSString(PSTR("E"), true), hex);
 	sendString(buf);
 	return isAOK();
 }
@@ -156,8 +156,7 @@ bool RN41_42::setUUID(char hex[32]) {
 //SF,1
 bool RN41_42::restoreFactoryDefaults() {
 	enterCommandMode();
-	emptyBuffer();
-	strcpy_P(buf, PSTR("SF,1\r\n"));
+	sprintf(buf, buildSString(PSTR("F"), false), 1);
 	sendString(buf);
 	return isAOK();
 }
@@ -166,8 +165,7 @@ bool RN41_42::restoreFactoryDefaults() {
 //SH,<value>
 bool RN41_42::setHIDRegister(char hex[4]) {
 	enterCommandMode();
-	emptyBuffer();
-	sprintf_P(buf, PSTR("SH,%s\r\n"), hex);
+	sprintf(buf, buildSString(PSTR("H"), true), hex);
 	sendString(buf);
 	return isAOK();
 }
@@ -176,8 +174,7 @@ bool RN41_42::setHIDRegister(char hex[4]) {
 //SI,<value>
 bool RN41_42::setInquiryScanWindow(char hex[4]) {
 	enterCommandMode();
-	emptyBuffer();
-	sprintf_P(buf, PSTR("SI,%s\r\n"), hex);
+	sprintf(buf, buildSString(PSTR("I"), true), hex);
 	sendString(buf);
 	return isAOK();
 }
@@ -186,8 +183,7 @@ bool RN41_42::setInquiryScanWindow(char hex[4]) {
 //SJ,<value>
 bool RN41_42::setPageScanWindow(char hex[4]) {
 	enterCommandMode();
-	emptyBuffer();
-	sprintf_P(buf, PSTR("SJ,%s\r\n"), hex);
+	sprintf(buf, buildSString(PSTR("J"), true), hex);
 	sendString(buf);
 	return isAOK();
 }
@@ -197,8 +193,7 @@ bool RN41_42::setPageScanWindow(char hex[4]) {
 bool RN41_42::setUARTParity(char parity) {
 	if (parity == 'E' || parity == 'O' || parity == 'N') {
 		enterCommandMode();
-		emptyBuffer();
-		sprintf_P(buf, PSTR("SL,%s\r\n"), parity);
+		sprintf(buf, buildSString(PSTR("L"), true), parity);
 		sendString(buf);
 		return isAOK();
 	}
@@ -221,8 +216,7 @@ bool RN41_42::setUARTParity(char parity) {
 bool RN41_42::setMode(int mode) {
 	if (mode >= 0 && mode <= 6) {
 		enterCommandMode();
-		emptyBuffer();
-		sprintf_P(buf, PSTR("SM,%d\r\n"), mode);
+		sprintf(buf, buildSString(PSTR("M"), false), mode);
 		sendString(buf);
 		return isAOK();
 	}
@@ -237,8 +231,7 @@ bool RN41_42::setMode(int mode) {
 //Maximum 20 characters
 bool RN41_42::setDeviceName(char name[20]) {
 	enterCommandMode();
-	emptyBuffer();
-	sprintf_P(buf, PSTR("SN,%s\r\n"), name);
+	sprintf(buf, buildSString(PSTR("N"), true), name);
 	sendString(buf);
 	return isAOK();
 }
@@ -248,8 +241,7 @@ bool RN41_42::setDeviceName(char name[20]) {
 //Maximum 8 characters
 bool RN41_42::setExtendedStatusString(char name[8]) {
 	enterCommandMode();
-	emptyBuffer();
-	sprintf_P(buf, PSTR("SO,%s\r\n"), name);
+	sprintf(buf, buildSString(PSTR("O"), true), name);
 	sendString(buf);
 	return isAOK();
 }
@@ -258,8 +250,7 @@ bool RN41_42::setExtendedStatusString(char name[8]) {
 //SP,<string>
 bool RN41_42::setPinCode(char pin[4]) {
 	enterCommandMode();
-	emptyBuffer();
-	sprintf_P(buf, PSTR("SP,%s\r\n"), pin);
+	sprintf(buf, buildSString(PSTR("P"), true), pin);
 	sendString(buf);
 	return isAOK();
 }
@@ -267,7 +258,6 @@ bool RN41_42::setPinCode(char pin[4]) {
 //Sets the Mask
 //SQ,<string>
 bool RN41_42::setMask(unsigned int mask) {
-	emptyBuffer();
 	switch (mask) {
 	case 0:
 	case 4:
@@ -276,7 +266,7 @@ bool RN41_42::setMask(unsigned int mask) {
 	case 128:
 	case 256:
 		enterCommandMode();
-		sprintf_P(buf, PSTR("SQ,%d\r\n"), mask);
+		sprintf(buf, buildSString(PSTR("Q"), false), mask);
 		sendString(buf);
 		return isAOK();
 	default:
@@ -288,8 +278,7 @@ bool RN41_42::setMask(unsigned int mask) {
 //SR,<hex value>
 bool RN41_42::setRemoteAddress(char address[12]) {
 	enterCommandMode();
-	emptyBuffer();
-	sprintf_P(buf, PSTR("SR,%s\r\n"), address);
+	sprintf(buf, buildSString(PSTR("R"), true), address);
 	sendString(buf);
 	return isAOK();
 }
@@ -298,8 +287,7 @@ bool RN41_42::setRemoteAddress(char address[12]) {
 //SR,Z
 bool RN41_42::eraseRemoteAddress() {
 	enterCommandMode();
-	emptyBuffer();
-	strcpy_P(buf, PSTR("SR,Z\r\n"));
+	sprintf(buf, buildSString(PSTR("R"), true), "Z");
 	sendString(buf);
 	return isAOK();
 }
@@ -309,7 +297,7 @@ bool RN41_42::eraseRemoteAddress() {
 bool RN41_42::setRemoteAddressLastObserved() {
 	enterCommandMode();
 	emptyBuffer();
-	strcpy_P(buf, PSTR("SR,I\r\n"));
+	sprintf(buf, buildSString(PSTR("R"), true), "I");
 	sendString(buf);
 	return isAOK();
 }
@@ -318,8 +306,7 @@ bool RN41_42::setRemoteAddressLastObserved() {
 //SS,<string>
 bool RN41_42::setServiceName(char name[20]) {
 	enterCommandMode();
-	emptyBuffer();
-	sprintf_P(buf, PSTR("SS,%s\r\n"), name);
+	sprintf(buf, buildSString(PSTR("S"), true), name);
 	sendString(buf);
 	return isAOK();
 }
@@ -329,8 +316,7 @@ bool RN41_42::setServiceName(char name[20]) {
 bool RN41_42::setConfigTimer(unsigned int value) {
 	if (value >= 0 && value <= 255) {
 		enterCommandMode();
-		emptyBuffer();
-		sprintf_P(buf, PSTR("SQ,%d\r\n"), value);
+		sprintf(buf, buildSString(PSTR("Q"), false), value);
 		sendString(buf);
 		return isAOK();
 	}
@@ -731,6 +717,28 @@ void RN41_42::emptyBuffer()
 	{
 		buf[i] = { '\0' };
 	}
+}
+
+char * RN41_42::buildSString(char cmd)
+{
+	return nullptr;
+}
+
+char *RN41_42::buildSString(const PROGMEM char* cmd, bool str)
+{
+	char sBuf[9];
+	emptyBuffer();
+	strcpy_P(sBuf, s);
+	strcat_P(sBuf, cmd);
+	strcat_P(sBuf, commaPercent);
+	if (str) {
+		strcat_P(sBuf, pgmStr);
+	}
+	else {
+		strcat_P(sBuf, pgmDec);
+	}
+	strcat_P(sBuf, term);
+	return sBuf;
 }
 
 bool RN41_42::isAOK() {

@@ -141,6 +141,8 @@ class RN41_42 {
 		bool exitCommandMode();
 		void setupIO();
 		void emptyBuffer();
+		char *buildSString(char cmd);
+		char *buildSString(const PROGMEM char* cmd, bool str);
 
 		//Send Data
 		void sendString(char *msg);
