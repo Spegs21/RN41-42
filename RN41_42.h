@@ -140,13 +140,19 @@ class RN41_42 {
 		bool enterCommandMode();
 		bool exitCommandMode();
 		void setupIO();
-		char *buildHex4SString(char cmd);
-		char *buildSString(const PROGMEM char* cmd, bool str);
+		char *buildHexSString(char cmd);
+		char *buildSString(const PROGMEM char* cmd, bool isString);
 
 		//Send Data
 		char *getString();
 		char *getString(char *buffer);
 		bool isAOK();
+
+		const char S[2] PROGMEM = { 'S','\0' };
+		const char commaPercent[3] PROGMEM = { ',','%','\0' };
+		const char str[2] PROGMEM = { 's','\0' };
+		const char dec[2] PROGMEM = { 'd','\0' };
+		const char pgmHex[4] PROGMEM = { '0','4','X','\0' };
 	};
 
 #endif

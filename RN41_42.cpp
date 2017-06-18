@@ -7,11 +7,7 @@
 
 #include "RN41_42.h"
 
-const char s PROGMEM = 'S';
-const char commaPercent[] PROGMEM = ",%";
-const char pgmStr[] PROGMEM = "s";
-const char pgmDec[] PROGMEM = "d";
-const char pgmHex[] PROGMEM = "04X";
+
 
 RN41_42::RN41_42(HardwareSerial &_serial) : serial(_serial) {
 	_commandMode = false;
@@ -132,7 +128,7 @@ bool RN41_42::setBreak(int breakVal) {
 bool RN41_42::setServiceClass(int hex) {
 	char buffer[8];
 	enterCommandMode();
-	sprintf(buffer, buildHex4SString(PSTR("C")), hex);
+	sprintf(buffer, buildHexSString(PSTR("C")), hex);
 	serial.println(buffer);
 	return isAOK();
 }
@@ -142,7 +138,7 @@ bool RN41_42::setServiceClass(int hex) {
 bool RN41_42::setDeviceClass(int hex) {
 	char buffer[8];
 	enterCommandMode();
-	sprintf(buffer, buildHex4SString(PSTR("D")), hex);
+	sprintf(buffer, buildHexSString(PSTR("D")), hex);
 	serial.println(buffer);
 	return isAOK();
 }
@@ -172,7 +168,7 @@ bool RN41_42::restoreFactoryDefaults() {
 bool RN41_42::setHIDRegister(int hex) {
 	char buffer[8];
 	enterCommandMode();
-	sprintf(buffer, buildHex4SString(PSTR("H")), hex);
+	sprintf(buffer, buildHexSString(PSTR("H")), hex);
 	serial.println(buffer);
 	return isAOK();
 }
@@ -182,7 +178,7 @@ bool RN41_42::setHIDRegister(int hex) {
 bool RN41_42::setInquiryScanWindow(int hex) {
 	char buffer[8];
 	enterCommandMode();
-	sprintf(buffer, buildHex4SString(PSTR("I")), hex);
+	sprintf(buffer, buildHexSString(PSTR("I")), hex);
 	serial.println(buffer);
 	return isAOK();
 }
@@ -192,7 +188,7 @@ bool RN41_42::setInquiryScanWindow(int hex) {
 bool RN41_42::setPageScanWindow(int hex) {
 	char buffer[8];
 	enterCommandMode();
-	sprintf(buffer, buildHex4SString(PSTR("J")), hex);
+	sprintf(buffer, buildHexSString(PSTR("J")), hex);
 	serial.println(buffer);
 	return isAOK();
 }
@@ -374,7 +370,7 @@ bool RN41_42::setUARTBaud(unsigned int baud) {
 bool RN41_42::setSniff(int hex) {
 	char buffer[8];
 	enterCommandMode();
-	sprintf(buffer, buildHex4SString(PSTR("W")), hex);
+	sprintf(buffer, buildHexSString(PSTR("W")), hex);
 	serial.println(buffer);
 	return isAOK();
 }
@@ -395,7 +391,7 @@ bool RN41_42::setBonding(bool en)
 bool RN41_42::setTransmitPower(int hex) {
 	char buffer[8];
 	enterCommandMode();
-	sprintf(buffer, buildHex4SString(PSTR("Y")), hex);
+	sprintf(buffer, buildHexSString(PSTR("Y")), hex);
 	serial.println(buffer);
 	return isAOK();
 }
@@ -470,7 +466,7 @@ bool RN41_42::setLPConnectMode(int hex)
 {
 	char buffer[8];
 	enterCommandMode();
-	sprintf(buffer, buildHex4SString(PSTR("|")), hex);
+	sprintf(buffer, buildHexSString(PSTR("|")), hex);
 	serial.println(buffer);
 	return isAOK();
 }
@@ -744,27 +740,27 @@ void RN41_42::setupIO()
 #endif // RN41_42_GPIO
 }
 
-char * RN41_42::buildHex4SString(char cmd)
+char * RN41_42::buildHexSString(char cmd)
 {
 	char sBuf[10];
-	strcpy_P(sBuf, s);
+	strcpy_P(sBuf, S);
 	strcat_P(sBuf, cmd);
 	strcat_P(sBuf, pgmHex);
 	sBuf[12] = { '\0' };
 	return sBuf;
 }
 
-char *RN41_42::buildSString(const PROGMEM char* cmd, bool str)
+char *RN41_42::buildSString(const PROGMEM char* cmd, bool isString)
 {
 	char sBuf[8];
-	strcpy_P(sBuf, s);
+	strcpy_P(sBuf, S);
 	strcat_P(sBuf, cmd);
 	strcat_P(sBuf, commaPercent);
-	if (str) {
-		strcat_P(sBuf, pgmStr);
+	if (isString) {
+		strcat_P(sBuf, str);
 	}
 	else {
-		strcat_P(sBuf, pgmDec);
+		strcat_P(sBuf, dec);
 	}
 	sBuf[10] = { '\0' };
 	return sBuf;
