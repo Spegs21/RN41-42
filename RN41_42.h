@@ -47,6 +47,9 @@ class RN41_42 {
 		#ifdef RN41_42_GPIO7
 			void setBaudRate9600(bool en);
 		#endif // RN41_42_GPIO7
+
+		bool enterCommandMode();
+		bool exitCommandMode();
 		
 		//set commands
 		bool setS7(bool en);
@@ -71,7 +74,7 @@ class RN41_42 {
 		bool setRemoteAddressLastObserved();
 		bool setServiceName(char name[20]);
 
-		bool setConfigTimer(unsigned int value);
+		bool setConfigTimer(byte value);
 		bool setUARTBaud(unsigned int baud);
 		bool setSniff(int hex);
 		bool setBonding(bool en);
@@ -94,18 +97,18 @@ class RN41_42 {
 
 		//action commands
 		char *displayDipwitchValues();
-		bool connectToAddress();
-		bool connectToAddress(char address[12]);
-		bool connectToAddressFast(char address[12]);
+		bool connectToStoredAddress();
+		bool connectToAddress(char address[13]);
+		bool connectToAddressFast(char address[13]);
 		bool connectToLastFoundAddressFast();
 		bool connectToStoredRemoteAddressFast();
-		bool connectToAddressTimed(char address[12],byte time);
+		bool connectToAddressTimed(char address[13],byte time);
 		bool fastDataMode();
 		char *help();
 		char *performInquiryScan(byte time);
-		char *performInquiryScan(byte time, char cod[6]);
+		char *performInquiryScan(byte time, int cod);
 		char *performInquiryScanNN(byte time);
-		char *performInquiryScanNN(byte time, char cod[6]);
+		char *performInquiryScanNN(byte time, int cod);
 		char *scanRSSI();
 		char *performRovingInquiryScan(byte time);
 		char *performCableReplaceInquiryScan(byte time);
@@ -131,14 +134,13 @@ class RN41_42 {
 		HardwareSerial &serial;
 
 		//Vaiables
-		char recvBuf[32];
+		char recvBuf[16];
 		bool _commandMode;
 		unsigned long _baud;
 		char _configChar[1];
 
 		//Private Commands
-		bool enterCommandMode();
-		bool exitCommandMode();
+		
 		void setupIO();
 		char *buildHexSString(const PROGMEM char* cmd);
 		char *buildSString(const PROGMEM char* cmd, bool isString);
@@ -153,6 +155,7 @@ class RN41_42 {
 		const PROGMEM char str[2] = { 's','\0' };
 		const PROGMEM char dec[2] = { 'd','\0' };
 		const PROGMEM char pgmHex[4] = { '0','4','X','\0' };
+		const PROGMEM char connected[12] = { 'C','o','n','n','e','c','t','e','d','\r','\n','\0' };
 	};
 
 #endif

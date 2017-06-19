@@ -326,14 +326,13 @@ bool RN41_42::setServiceName(char name[20])
 
 //Set Remote Config Timer
 //ST,<string>
-bool RN41_42::setConfigTimer(unsigned int value)
+bool RN41_42::setConfigTimer(byte value)
 {
-	if (!(value >= 0 && value <= 255) || !_commandMode) { return false; }
-		char buffer[7];
-		enterCommandMode();
-		snprintf(buffer, sizeof(buffer), buildSString(PSTR("Q"), false), value);
-		serial.println(buffer);
-		return isAOK();
+	if (!_commandMode) { return false; }
+	char buffer[7];
+	snprintf(buffer, sizeof(buffer), buildSString(PSTR("T"), false), value);
+	serial.println(buffer);
+	return isAOK();
 }
 
 //Set UART Baud
@@ -533,6 +532,76 @@ char *RN41_42::getGPIOStatus()
 	return getString();
 }
 
+char * RN41_42::displayDipwitchValues()
+{
+	if (!_commandMode) { return false; }
+	serial.println(PSTR("&"));
+	return getString();
+}
+
+bool RN41_42::connectToStoredAddress()
+{
+	if (!_commandMode) { return false; }
+	serial.println(PSTR("C"));
+	return strncmp_P(getString(), connected, 12) == 0 ? true : false;
+}
+
+bool RN41_42::connectToAddress(char address[13])
+{
+	if (!_commandMode) { return false; }
+	char buffer[15];
+	snprintf_P(buffer, sizeof(buffer), PSTR("C,%S"), address);
+	serial.println(buffer);
+	return strncmp_P(getString(), connected, 12) == 0 ? true : false;
+}
+
+bool RN41_42::connectToAddressFast(char address[13])
+{
+	if (!_commandMode) { return false; }
+	char buffer[16];
+	snprintf_P(buffer, sizeof(buffer), PSTR("CF,%S"), address);
+	serial.println(buffer);
+	return strncmp_P(getString(), connected, 12) == 0 ? true : false;
+}
+
+bool RN41_42::connectToLastFoundAddressFast()
+{
+	if (!_commandMode) { return false; }
+	serial.println(PSTR("CFI"));
+	return strncmp_P(getString(), connected, 12) == 0 ? true : false;
+}
+
+bool RN41_42::connectToStoredRemoteAddressFast()
+{
+	if (!_commandMode) { return false; }
+	serial.println(PSTR("CFR"));
+	return strncmp_P(getString(), connected, 12) == 0 ? true : false;
+}
+
+bool RN41_42::connectToAddressTimed(char address[13], byte time)
+{
+	if (!_commandMode) { return false; }
+	char buffer[19];
+	snprintf_P(buffer, sizeof(buffer), PSTR("CT,%S,$d"), address, time);
+	serial.println(buffer);
+	return strncmp_P(getString(), connected, 12) == 0 ? true : false;
+}
+
+bool RN41_42::fastDataMode()
+{
+	if (!_commandMode) { return false; }
+	serial.println(PSTR("F,1"));
+	_commandMode = false;
+	return true;
+}
+
+char * RN41_42::help()
+{
+	if (!_commandMode) { return false; }
+	serial.println(PSTR("H"));
+	return getString();
+}
+
 bool RN41_42::killConnection()
 {
 	if (!_commandMode) { return false; }
@@ -589,11 +658,6 @@ bool RN41_42::reset()
 #endif // RN41_42_RESET_PIN
 }
 
-bool RN41_42::connectToAddress(char address[12])
-{
-	return false;
-}
-
 bool RN41_42::sendMessage(char message[32])
 {
 	if (_commandMode) { return false; }
@@ -622,7 +686,7 @@ bool RN41_42::enterCommandMode()
 //Exit Command Mode
 bool RN41_42::exitCommandMode()
 {
-	if (_commandMode) { return true; }
+	if (!_commandMode) { return true; }
 	char buffer[6];
 	serial.println(PSTR("---"));
 	if (strncmp_P(getString(buffer), PSTR("END\r\n"), 6) == 0) { _commandMode = false; return true; }
@@ -689,7 +753,6 @@ char * RN41_42::buildHexSString(const PROGMEM char* cmd)
 	strncpy_P(sBuf, S, 2);
 	strncat_P(sBuf, cmd, 2);
 	strncat_P(sBuf, pgmHex, 4);
-	sBuf[9] = { '\0' };
 	return sBuf;
 }
 
@@ -702,10 +765,10 @@ char *RN41_42::buildSString(const PROGMEM char* cmd, bool isString)
 	if (isString) {
 		strncat_P(sBuf, str, 2);
 	}
-	else {
+	else
+	{
 		strncat_P(sBuf, dec, 2);
 	}
-	sBuf[7] = { '\0' };
 	return sBuf;
 }
 
