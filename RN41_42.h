@@ -60,7 +60,7 @@ class RN41_42 {
 		bool setInquiryScanWindow(int hex);
 		bool setPageScanWindow(int hex);
 		bool setUARTParity(char parity);
-		bool setMode(int mode);
+		bool setMode(unsigned int mode);
 		bool setDeviceName(char name[20]);
 		bool setExtendedStatusString(char name[8]);
 		bool setPinCode(char pin[4]);
@@ -114,7 +114,7 @@ class RN41_42 {
 		char *linkQuality();
 		char *remoteModemSignalStatus();
 		char *otherSettings();
-		void passMessage(char[32]);
+		void passMessage(char mes[32]);
 		bool quietMode();
 		bool passThrough(bool en);
 		bool uartChangeTemp(char baud[4], char parity);
@@ -140,7 +140,7 @@ class RN41_42 {
 		bool enterCommandMode();
 		bool exitCommandMode();
 		void setupIO();
-		char *buildHexSString(char cmd);
+		char *buildHexSString(const PROGMEM char* cmd);
 		char *buildSString(const PROGMEM char* cmd, bool isString);
 
 		//Send Data
@@ -148,11 +148,11 @@ class RN41_42 {
 		char *getString(char *buffer);
 		bool isAOK();
 
-		const char S[2] PROGMEM = { 'S','\0' };
-		const char commaPercent[3] PROGMEM = { ',','%','\0' };
-		const char str[2] PROGMEM = { 's','\0' };
-		const char dec[2] PROGMEM = { 'd','\0' };
-		const char pgmHex[4] PROGMEM = { '0','4','X','\0' };
+		const PROGMEM char S[2] = { 'S','\0' };
+		const PROGMEM char commaPercent[3] = { ',','%','\0' };
+		const PROGMEM char str[2] = { 's','\0' };
+		const PROGMEM char dec[2] = { 'd','\0' };
+		const PROGMEM char pgmHex[4] = { '0','4','X','\0' };
 	};
 
 #endif
