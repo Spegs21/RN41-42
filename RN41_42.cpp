@@ -326,7 +326,7 @@ bool RN41_42::setServiceName(char name[20])
 
 //Set Remote Config Timer
 //ST,<string>
-bool RN41_42::setConfigTimer(byte value)
+bool RN41_42::setConfigTimer(int value)
 {
 	if (!_commandMode) { return false; }
 	char buffer[7];
@@ -578,7 +578,7 @@ bool RN41_42::connectToStoredRemoteAddressFast()
 	return strncmp_P(getString(), connected, 12) == 0 ? true : false;
 }
 
-bool RN41_42::connectToAddressTimed(char address[13], byte time)
+bool RN41_42::connectToAddressTimed(char address[13], int time)
 {
 	if (!_commandMode) { return false; }
 	char buffer[19];
@@ -602,11 +602,100 @@ char * RN41_42::help()
 	return getString();
 }
 
+char * RN41_42::performInquiryScan(int time)
+{
+	if (!(time <= 48) || !_commandMode) { return false; }
+	char buffer[5];
+	snprintf_P(buffer, sizeof(buffer), PSTR("I,$d"), time);
+	serial.println(buffer);
+	return getString();
+}
+
+char * RN41_42::performInquiryScan(int time, int cod)
+{
+	if (!(time <= 48) || !_commandMode) { return false; }
+	char buffer[11];
+	snprintf_P(buffer, sizeof(buffer), PSTR("I,$d,%06X"), time, cod);
+	serial.println(buffer);
+	return getString();
+}
+
+char * RN41_42::performInquiryScanNN(int time)
+{
+	if (!(time <= 48) || !_commandMode) { return false; }
+	char buffer[5];
+	snprintf_P(buffer, sizeof(buffer), PSTR("IN$d"), time);
+	serial.println(buffer);
+	return getString();
+}
+
+char * RN41_42::performInquiryScanNN(int time, int cod)
+{
+	if (!(time <= 48) || !_commandMode) { return false; }
+	char buffer[11];
+	snprintf_P(buffer, sizeof(buffer), PSTR("IN$d,%06X"), time, cod);
+	serial.println(buffer);
+	return getString();
+}
+
+char * RN41_42::scanRSSI()
+{
+	if (!_commandMode) { return false; }
+	serial.println(PSTR("IQ"));
+	return getString();
+}
+
+char * RN41_42::performRovingInquiryScan(int time)
+{
+	if (!_commandMode) { return false; }
+	char buffer[5];
+	snprintf_P(buffer, sizeof(buffer), PSTR("IS$d"), time);
+	serial.println(buffer);
+	return getString();
+}
+
+char * RN41_42::performCableReplaceInquiryScan(int time)
+{
+	if (!_commandMode) { return false; }
+	char buffer[5];
+	snprintf_P(buffer, sizeof(buffer), PSTR("IR$d"), time);
+	serial.println(buffer);
+	return getString();
+}
+
+bool RN41_42::hidePIN()
+{
+	if (!_commandMode) { return false; }
+	serial.println(PSTR("J"));
+	return true;
+}
+
 bool RN41_42::killConnection()
 {
 	if (!_commandMode) { return false; }
 	serial.println(PSTR("K,"));
 	return strncmp_P(getString(), PSTR("KILL\r\n"), 7) == 0 ? true : false;
+}
+
+char * RN41_42::linkQuality()
+{
+	if (!_commandMode) { return false; }
+	serial.println(PSTR("L"));
+	return getString();
+}
+
+char * RN41_42::remoteModemSignalStatus()
+{
+	if (!_commandMode) { return false; }
+	serial.println(PSTR("M"));
+	return getString();
+}
+
+char * RN41_42::otherSettings()
+{
+	if (!_commandMode) { return false; }
+	serial.println(PSTR("O"));
+	return getString();
 }
 
 void RN41_42::passMessage(char mes[32])
@@ -624,12 +713,38 @@ bool RN41_42::quietMode()
 	return strncmp_P(getString(), PSTR("QUIET\r\n"), 8) == 0 ? true : false;
 }
 
+bool RN41_42::passThrough(bool en)
+{
+	if (!_commandMode) { return false; }
+	char buffer[4];
+	snprintf_P(buffer, sizeof(buffer), PSTR("T,$d"), en);
+	serial.println(buffer);
+	return true;
+}
+
+bool RN41_42::uartChangeTemp(char baud[4], char parity)
+{
+	if (!_commandMode) { return false; }
+	char buffer[9];
+	snprintf_P(buffer, sizeof(buffer), PSTR("U,%S,%S"), baud, parity);
+	serial.println(buffer);
+	if (isAOK()) { _commandMode = false; return true; }
+	return false;
+}
+
 //Get The Device's Firmware Version
 char *RN41_42::getFirmwareVersion()
 {
 	if (!_commandMode) { return false; }
 	serial.println(PSTR("V"));
 	return getString();
+}
+
+bool RN41_42::enableDiscoveryConnection()
+{
+	if (!_commandMode) { return false; }
+	serial.println(PSTR("W"));
+	return true;
 }
 
 void RN41_42::sleep()

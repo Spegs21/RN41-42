@@ -74,7 +74,7 @@ class RN41_42 {
 		bool setRemoteAddressLastObserved();
 		bool setServiceName(char name[20]);
 
-		bool setConfigTimer(byte value);
+		bool setConfigTimer(int value);
 		bool setUARTBaud(unsigned int baud);
 		bool setSniff(int hex);
 		bool setBonding(bool en);
@@ -102,16 +102,16 @@ class RN41_42 {
 		bool connectToAddressFast(char address[13]);
 		bool connectToLastFoundAddressFast();
 		bool connectToStoredRemoteAddressFast();
-		bool connectToAddressTimed(char address[13],byte time);
+		bool connectToAddressTimed(char address[13], int time);
 		bool fastDataMode();
 		char *help();
-		char *performInquiryScan(byte time);
-		char *performInquiryScan(byte time, int cod);
-		char *performInquiryScanNN(byte time);
-		char *performInquiryScanNN(byte time, int cod);
+		char *performInquiryScan(int time);
+		char *performInquiryScan(int time, int cod);
+		char *performInquiryScanNN(int time);
+		char *performInquiryScanNN(int time, int cod);
 		char *scanRSSI();
-		char *performRovingInquiryScan(byte time);
-		char *performCableReplaceInquiryScan(byte time);
+		char *performRovingInquiryScan(int time);
+		char *performCableReplaceInquiryScan(int time);
 		bool hidePIN();
 		bool killConnection();
 		char *linkQuality();
@@ -152,6 +152,7 @@ class RN41_42 {
 
 		const PROGMEM char S[2] = { 'S','\0' };
 		const PROGMEM char commaPercent[3] = { ',','%','\0' };
+		const PROGMEM char comma[2] = { ',','\0' };
 		const PROGMEM char str[2] = { 's','\0' };
 		const PROGMEM char dec[2] = { 'd','\0' };
 		const PROGMEM char pgmHex[4] = { '0','4','X','\0' };
