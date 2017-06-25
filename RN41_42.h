@@ -18,7 +18,7 @@
 //#define RN41_42_GPIO6           //Auto-Connect
 //#define RN41_42_GPIO7           //Baud Rate
 
-#define USE_GPIO
+//#define USE_GPIO
 
 #if defined(ARDUINO) && ARDUINO >= 100
 	#include "arduino.h"
@@ -34,7 +34,10 @@ class RN41_42 {
 		RN41_42(HardwareSerial & _serial, char configChar);
 		void begin(unsigned long baudrate);
 		void begin();
-		bool reset();
+		bool enterCommandMode();
+		bool exitCommandMode();
+		bool sendMessage(char message[33]);
+		char *recieveMessage();
 
 		//Dipswitch/GPIO Functions
 		#ifdef RN41_42_GPIO4
@@ -50,95 +53,86 @@ class RN41_42 {
 			void setBaudRate9600(bool en);
 		#endif // RN41_42_GPIO7
 
-		bool enterCommandMode();
-		bool exitCommandMode();
-		
 		//Set Commands
-		bool setS7(bool en);
-		bool setAuthenticationMode(uint8_t authMode);
-		bool setBreak(uint8_t breakVal);
-		bool setServiceClass(uint8_t hex);
-		bool setDeviceClass(uint8_t hex);
-		bool setUUID(char hex[32]);
-		bool restoreFactoryDefaults();
-		bool setHIDRegister(uint8_t hex);
-		bool setInquiryScanWindow(uint8_t hex);
-		bool setPageScanWindow(uint8_t hex);
-		bool setUARTParity(char parity);
-		bool setMode(unsigned int mode);
-		bool setDeviceName(char name[20]);
-		bool setExtendedStatusString(char name[8]);
-		bool setPinCode(char pin[4]);
-		bool setMask(uint8_t mask);
-		bool setRemoteAddress(char address[12]);
-		bool eraseRemoteAddress();
-
-		bool setRemoteAddressLastObserved();
-		bool setServiceName(char name[20]);
-
-		bool setConfigTimer(uint8_t value);
-		bool setUARTBaud(uint8_t baud);
-		bool setSniff(uint8_t hex);
-		bool setBonding(bool en);
-		bool setTransmitPower(uint8_t hex);
-		bool setNonStandardBaud(uint8_t multi);
-		bool setProfile(uint8_t value);
-		bool setSerializedFriendlyName(char name[15]);
-		bool setRoleSwitch(bool en);
-		bool setConfigChar(char c);
-		bool setLPConnectMode(uint8_t hex);
+		bool setS7(bool en);							//S7
+		bool setAuthenticationMode(uint8_t authMode);	//SA
+		bool setBreak(uint8_t breakVal);				//SB
+		bool setServiceClass(uint16_t hex);				//SC
+		bool setDeviceClass(uint16_t hex);				//SD
+		bool setUUID(char hex[32]);						//SE
+		bool restoreFactoryDefaults();					//SF,1
+		bool setHIDRegister(uint16_t hex);				//SH
+		bool setInquiryScanWindow(uint16_t hex);		//SI
+		bool setPageScanWindow(uint16_t hex);			//SJ
+		bool setUARTParity(char parity);				//SL
+		bool setMode(unsigned int mode);				//SM
+		bool setDeviceName(char name[21]);				//SN
+		bool setExtendedStatusString(char name[9]);		//SO
+		bool setPinCode(char pin[5]);					//SP
+		bool setMask(uint8_t mask);						//SQ
+		bool setRemoteAddress(char address[13]);		//SR
+		bool eraseRemoteAddress();						//SR,Z
+		bool setRemoteAddressLastObserved();			//SR,I
+		bool setServiceName(char name[21]);				//SS
+		bool setConfigTimer(uint8_t value);				//ST
+		bool setUARTBaud(uint8_t baud);					//SU
+		bool setSniff(uint16_t hex);					//SW
+		bool setBonding(bool en);						//SX
+		bool setTransmitPower(uint16_t hex);			//SY
+		bool setNonStandardBaud(uint8_t multi);			//SZ
+		bool setProfile(uint8_t value);					//S~
+		bool setSerializedFriendlyName(char name[16]);	//S-
+		bool setRoleSwitch(bool en);					//S?
+		bool setConfigChar(char c);						//S$
+		bool setLPConnectMode(uint8_t hex);				//S|
 
 		//Get Commands
-		char *getBasicSettings();
-		char *getExtendedSettings();
-		char *getBluetoothAddress();
-		char *getConnectedRemoteAddress();
-		bool getConnectionStatus();
-		char *getStoredRemoteAddress();
-		char *getGPIOStatus();
+		char *getBasicSettings();			//D
+		char *getExtendedSettings();		//E
+		char *getBluetoothAddress();		//GB
+		char *getConnectedRemoteAddress();	//GF
+		bool getConnectionStatus();			//GK
+		char *getStoredRemoteAddress();		//GR
+		char *getGPIOStatus();				//G&
 
 		//Action Commands
-		char *displayDipwitchValues();
-		bool connectToStoredAddress();
-		bool connectToAddress(char address[13]);
-		bool connectToAddressFast(char address[13]);
-		bool connectToLastFoundAddressFast();
-		bool connectToStoredRemoteAddressFast();
-		bool connectToAddressTimed(char address[13], uint8_t time);
-		bool fastDataMode();
-		char *help();
-		char *performInquiryScan(uint8_t time);
-		char *performInquiryScan(uint8_t time, uint8_t cod);
-		char *performInquiryScanNN(uint8_t time);
-		char *performInquiryScanNN(uint8_t time, uint8_t cod);
-		char *scanRSSI();
-		char *performRovingInquiryScan(uint8_t time);
-		char *performCableReplaceInquiryScan(uint8_t time);
-		bool hidePIN();
-		bool killConnection();
-		char *linkQuality();
-		char *remoteModemSignalStatus();
-		char *otherSettings();
-		void passMessage(char mes[32]);
-		bool quietMode();
-		bool passThrough(bool en);
-		bool uartChangeTemp(char baud[4], char parity);
-		char *getFirmwareVersion();
-		bool enableDiscoveryConnection();
-		void sleep();
+		char *displayDipwitchValues();									//&
+		bool connectToStoredAddress();									//C
+		bool connectToAddress(char address[13]);						//C,<address>
+		bool connectToAddressFast(char address[13]);					//CF
+		bool connectToLastFoundAddressFast();							//CFI
+		bool connectToStoredRemoteAddressFast();						//CFR
+		bool connectToAddressTimed(char address[13], uint8_t time);		//CT
+		bool fastDataMode();											//F,1
+		char *help();													//H
+		char *performInquiryScan(uint8_t time);							//I,<value 1>
+		char *performInquiryScan(uint8_t time, uint32_t cod);			//I,<value 1>,<value 2>
+		char *performInquiryScanNN(uint8_t time);						//IN,<value 1>
+		char *performInquiryScanNN(uint8_t time, uint32_t cod);			//IN,<value 1>,<value 2>
+		char *scanRSSI();												//IQ
+		char *performRovingInquiryScan(uint8_t time);					//IS
+		char *performCableReplaceInquiryScan(uint8_t time);				//IR
+		bool hidePIN();													//J
+		bool killConnection();											//K,
+		char *linkQuality();											//L
+		char *remoteModemSignalStatus();								//M
+		char *otherSettings();											//O
+		void passMessage(char mes[33]);									//P
+		bool quietMode();												//Q
+		bool reset();													//R,1 or GPIO
+		bool passThrough(bool en);										//T
+		bool uartChangeTemp(char baud[5], char parity);					//U
+		char *getFirmwareVersion();										//V
+		bool enableDiscoveryConnection();								//W
+		void sleep();													//Z
 
 		//GPIO Commands
-
-#ifdef USE_GPIO
-		bool pinMode(uint8_t pin, uint8_t dir);
-		bool digitalWrite(uint8_t pin, uint8_t val);
-		bool pinModePowerUp(uint8_t pin, uint8_t dir);
-		bool digitalWritePowerUp(uint8_t pin, uint8_t val);
-#endif // USE_GPIO
-
-		//Message Mode
-		bool sendMessage(char message[32]);
-		char *recieveMessage();
+		#ifdef USE_GPIO
+			bool pinMode(uint8_t pin, uint8_t dir);					//S@
+			bool digitalWrite(uint8_t pin, uint8_t val);			//S& and S*
+			bool pinModePowerUp(uint8_t pin, uint8_t dir);			//S%
+			bool digitalWritePowerUp(uint8_t pin, uint8_t val);		//S^
+		#endif // USE_GPIO
 
 	private:
 
@@ -150,26 +144,32 @@ class RN41_42 {
 		unsigned long _baud;
 		char _configChar[1];
 
-#ifdef USE_GPIO
-		byte gpioSet = 0;
-		byte gpioDir = 0;
-		byte gpioVal = 0;
-		byte gpio811 = 0;
-		byte gpioSetPowerUp = 0;
-		byte gpioDirPowerUp = 0;
-		byte gpioValPowerUp = 0;
-#endif // USE_GPIO
+		//GPIO Bitmasks
+		#ifdef USE_GPIO
+			uint8_t gpioSetDir = 0U;
+			uint8_t gpioDir = 0U;
+			uint8_t gpioSetVal = 0U;
+			uint8_t gpioVal = 0U;
+			uint8_t gpio811 = 0U;
+			uint8_t gpioSetDirPowerUp = 0U;
+			uint8_t gpioDirPowerUp = 0U;
+			uint8_t gpioSetValPowerUp = 0U;
+			uint8_t gpioValPowerUp = 0U;
+		#endif // USE_GPIO
 
 		//Private Commands
 		void setupIO();
 		char *buildHexSString(const PROGMEM char* cmd);
 		char *buildSString(const PROGMEM char* cmd, bool isString);
 
-		//Send Data
+		//Recieve Data
 		char *getString();
 		char *getString(char *buffer);
+
+		//Response Check
 		bool isAOK();
 
+		//Constants
 		const PROGMEM char S[2] = { 'S','\0' };
 		const PROGMEM char commaPercent[3] = { ',','%','\0' };
 		const PROGMEM char comma[2] = { ',','\0' };
