@@ -94,7 +94,7 @@ bool RN41_42::setS7(bool en)
 //2 - SSP "Just Works" Mode
 //4 - Pin Code
 //Default Mode: 1
-bool RN41_42::setAuthenticationMode(int authMode)
+bool RN41_42::setAuthenticationMode(uint8_t authMode)
 {
 	if (!(authMode >= 0 && authMode <= 4 && authMode != 3) || !_commandMode) { return false; }
 	char buffer[5];
@@ -105,7 +105,7 @@ bool RN41_42::setAuthenticationMode(int authMode)
 
 //Set Break
 //SB,<value>
-bool RN41_42::setBreak(int breakVal)
+bool RN41_42::setBreak(uint8_t breakVal)
 {
 	if (!(breakVal >= 1 && breakVal <= 6) || !_commandMode) { return false; }
 	char buffer[5];
@@ -116,7 +116,7 @@ bool RN41_42::setBreak(int breakVal)
 
 //Set Service Class
 //SC,<value>
-bool RN41_42::setServiceClass(int hex)
+bool RN41_42::setServiceClass(uint8_t hex)
 {
 	if (!_commandMode) { return false; }
 	char buffer[8];
@@ -128,7 +128,7 @@ bool RN41_42::setServiceClass(int hex)
 
 //Set Device Class
 //SD,<value>
-bool RN41_42::setDeviceClass(int hex)
+bool RN41_42::setDeviceClass(uint8_t hex)
 {
 	if (!_commandMode) { return false; }
 	char buffer[8];
@@ -161,7 +161,7 @@ bool RN41_42::restoreFactoryDefaults()
 
 //Set HID Flag Register
 //SH,<value>
-bool RN41_42::setHIDRegister(int hex)
+bool RN41_42::setHIDRegister(uint8_t hex)
 {
 	if (!_commandMode) { return false; }
 	char buffer[8];
@@ -172,7 +172,7 @@ bool RN41_42::setHIDRegister(int hex)
 
 //Set Inquiry Scan Window
 //SI,<value>
-bool RN41_42::setInquiryScanWindow(int hex)
+bool RN41_42::setInquiryScanWindow(uint8_t hex)
 {
 	if (!_commandMode) { return false; }
 	char buffer[8];
@@ -183,7 +183,7 @@ bool RN41_42::setInquiryScanWindow(int hex)
 
 //Set Page Scan Window
 //SJ,<value>
-bool RN41_42::setPageScanWindow(int hex)
+bool RN41_42::setPageScanWindow(uint8_t hex)
 {
 	if (!_commandMode) { return false; }
 	char buffer[8];
@@ -260,7 +260,7 @@ bool RN41_42::setPinCode(char pin[4])
 
 //Sets the Mask
 //SQ,<string>
-bool RN41_42::setMask(unsigned int mask)
+bool RN41_42::setMask(uint8_t mask)
 {
 	if (!_commandMode) { return false; }
 	char buffer[7];
@@ -326,7 +326,7 @@ bool RN41_42::setServiceName(char name[20])
 
 //Set Remote Config Timer
 //ST,<string>
-bool RN41_42::setConfigTimer(int value)
+bool RN41_42::setConfigTimer(uint8_t value)
 {
 	if (!_commandMode) { return false; }
 	char buffer[7];
@@ -337,7 +337,7 @@ bool RN41_42::setConfigTimer(int value)
 
 //Set UART Baud
 //SU,<value>
-bool RN41_42::setUARTBaud(unsigned int baud)
+bool RN41_42::setUARTBaud(uint8_t baud)
 {
 	if (!_commandMode) { return false; }
 	char buffer[6];
@@ -364,7 +364,7 @@ bool RN41_42::setUARTBaud(unsigned int baud)
 
 //Set Sniff Mode
 //SW,<value>
-bool RN41_42::setSniff(int hex)
+bool RN41_42::setSniff(uint8_t hex)
 {
 	if (!_commandMode) { return false; }
 	char buffer[8];
@@ -386,7 +386,7 @@ bool RN41_42::setBonding(bool en)
 
 //Set Transmit Power
 //SY,<hex value>
-bool RN41_42::setTransmitPower(int hex)
+bool RN41_42::setTransmitPower(uint8_t hex)
 {
 	if (!_commandMode) { return false; }
 	char buffer[8];
@@ -397,7 +397,7 @@ bool RN41_42::setTransmitPower(int hex)
 
 //Set Non-Standard Baud
 //SZ,<value>
-bool RN41_42::setNonStandardBaud(unsigned int multi)
+bool RN41_42::setNonStandardBaud(uint8_t multi)
 {
 	if (!_commandMode) { return false; }
 	char buffer[6];
@@ -408,7 +408,7 @@ bool RN41_42::setNonStandardBaud(unsigned int multi)
 
 //Set Profile
 //S~,<value>
-bool RN41_42::setProfile(int value) {
+bool RN41_42::setProfile(uint8_t value) {
 	if (!(value >= 0 && value <= 6) || !_commandMode) { return false; }
 		char buffer[5];
 		enterCommandMode();
@@ -453,7 +453,7 @@ bool RN41_42::setConfigChar(char c)
 
 //Set Low-Power Connect Mode
 //S|,<value>
-bool RN41_42::setLPConnectMode(int hex)
+bool RN41_42::setLPConnectMode(uint8_t hex)
 {
 	if (!_commandMode) { return false; }
 	char buffer[8];
@@ -578,7 +578,7 @@ bool RN41_42::connectToStoredRemoteAddressFast()
 	return strncmp_P(getString(), connected, 12) == 0 ? true : false;
 }
 
-bool RN41_42::connectToAddressTimed(char address[13], int time)
+bool RN41_42::connectToAddressTimed(char address[13], uint8_t time)
 {
 	if (!_commandMode) { return false; }
 	char buffer[19];
@@ -602,7 +602,7 @@ char * RN41_42::help()
 	return getString();
 }
 
-char * RN41_42::performInquiryScan(int time)
+char * RN41_42::performInquiryScan(uint8_t time)
 {
 	if (!(time <= 48) || !_commandMode) { return false; }
 	char buffer[5];
@@ -611,7 +611,7 @@ char * RN41_42::performInquiryScan(int time)
 	return getString();
 }
 
-char * RN41_42::performInquiryScan(int time, int cod)
+char * RN41_42::performInquiryScan(uint8_t time, uint8_t cod)
 {
 	if (!(time <= 48) || !_commandMode) { return false; }
 	char buffer[11];
@@ -620,7 +620,7 @@ char * RN41_42::performInquiryScan(int time, int cod)
 	return getString();
 }
 
-char * RN41_42::performInquiryScanNN(int time)
+char * RN41_42::performInquiryScanNN(uint8_t time)
 {
 	if (!(time <= 48) || !_commandMode) { return false; }
 	char buffer[5];
@@ -629,7 +629,7 @@ char * RN41_42::performInquiryScanNN(int time)
 	return getString();
 }
 
-char * RN41_42::performInquiryScanNN(int time, int cod)
+char * RN41_42::performInquiryScanNN(uint8_t time, uint8_t cod)
 {
 	if (!(time <= 48) || !_commandMode) { return false; }
 	char buffer[11];
@@ -645,7 +645,7 @@ char * RN41_42::scanRSSI()
 	return getString();
 }
 
-char * RN41_42::performRovingInquiryScan(int time)
+char * RN41_42::performRovingInquiryScan(uint8_t time)
 {
 	if (!_commandMode) { return false; }
 	char buffer[5];
@@ -654,7 +654,7 @@ char * RN41_42::performRovingInquiryScan(int time)
 	return getString();
 }
 
-char * RN41_42::performCableReplaceInquiryScan(int time)
+char * RN41_42::performCableReplaceInquiryScan(uint8_t time)
 {
 	if (!_commandMode) { return false; }
 	char buffer[5];
@@ -752,6 +752,63 @@ void RN41_42::sleep()
 	serial.println(PSTR("Z"));
 	_commandMode = false;
 }
+
+//GPIO Commands
+
+#ifdef USE_GPIO
+
+bool RN41_42::pinMode(uint8_t pin, uint8_t dir)
+{
+	if (!(pin >= 0 && pin <= 7) || !(dir == 0 || dir == 1) ||!_commandMode) { return false; }
+	bitSet(gpioSet, pin);
+	bitWrite(gpioDir, pin, dir);
+	char buffer[8];
+	snprintf_P(buffer, sizeof(buffer), PSTR("S@,%02X%02X"), gpioSet, gpioDir);
+	serial.println(buffer);
+	return true;
+}
+
+bool RN41_42::digitalWrite(uint8_t pin, uint8_t val)
+{
+	if (!(pin >= 0 && pin <= 11) || !(val == 0 || val == 1) || !_commandMode) { return false; }
+	char buffer[8];
+	if (pin <= 7)
+	{
+		bitWrite(gpioVal, pin, val);
+		snprintf_P(buffer, sizeof(buffer), PSTR("S&,%02X%02X"), gpioSet, gpioVal);
+	}
+	else
+	{
+		bitSet(gpio811, (pin - 4) );
+		bitWrite(gpio811, (pin - 8), val);
+		snprintf_P(buffer, sizeof(buffer), PSTR("S*,%02X%02X"), (gpio811 >> 4), gpio811 & 0xF);
+	}
+	serial.println(buffer);
+	return true;
+}
+
+bool RN41_42::pinModePowerUp(uint8_t pin, uint8_t dir)
+{
+	if (!(pin >= 0 && pin <= 7) || !(dir == 0 || dir == 1) || !_commandMode) { return false; }
+	bitSet(gpioSetPowerUp, pin);
+	bitWrite(gpioDirPowerUp, pin, dir);
+	char buffer[8];
+	snprintf_P(buffer, sizeof(buffer), PSTR("S%,%02X%02X"), gpioSetPowerUp, gpioDirPowerUp);
+	serial.println(buffer);
+	return true;
+}
+
+bool RN41_42::digitalWritePowerUp(uint8_t pin, uint8_t val)
+{
+	if (!(pin >= 0 && pin <= 7) || !(val == 0 || val == 1) || !_commandMode) { return false; }
+	bitWrite(gpioValPowerUp, pin, val);
+	char buffer[8];
+	snprintf_P(buffer, sizeof(buffer), PSTR("S^,%02X%02X"), gpioSetPowerUp, gpioValPowerUp);
+	serial.println(buffer);
+	return true;
+}
+
+#endif // USE_GPIO
 
 //Resets The Device
 //Also Exits Command Mode

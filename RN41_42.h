@@ -18,6 +18,8 @@
 //#define RN41_42_GPIO6           //Auto-Connect
 //#define RN41_42_GPIO7           //Baud Rate
 
+#define USE_GPIO
+
 #if defined(ARDUINO) && ARDUINO >= 100
 	#include "arduino.h"
 #else
@@ -51,42 +53,42 @@ class RN41_42 {
 		bool enterCommandMode();
 		bool exitCommandMode();
 		
-		//set commands
+		//Set Commands
 		bool setS7(bool en);
-		bool setAuthenticationMode(int authMode);
-		bool setBreak(int breakVal);
-		bool setServiceClass(int hex);
-		bool setDeviceClass(int hex);
+		bool setAuthenticationMode(uint8_t authMode);
+		bool setBreak(uint8_t breakVal);
+		bool setServiceClass(uint8_t hex);
+		bool setDeviceClass(uint8_t hex);
 		bool setUUID(char hex[32]);
 		bool restoreFactoryDefaults();
-		bool setHIDRegister(int hex);
-		bool setInquiryScanWindow(int hex);
-		bool setPageScanWindow(int hex);
+		bool setHIDRegister(uint8_t hex);
+		bool setInquiryScanWindow(uint8_t hex);
+		bool setPageScanWindow(uint8_t hex);
 		bool setUARTParity(char parity);
 		bool setMode(unsigned int mode);
 		bool setDeviceName(char name[20]);
 		bool setExtendedStatusString(char name[8]);
 		bool setPinCode(char pin[4]);
-		bool setMask(unsigned int mask);
+		bool setMask(uint8_t mask);
 		bool setRemoteAddress(char address[12]);
 		bool eraseRemoteAddress();
 
 		bool setRemoteAddressLastObserved();
 		bool setServiceName(char name[20]);
 
-		bool setConfigTimer(int value);
-		bool setUARTBaud(unsigned int baud);
-		bool setSniff(int hex);
+		bool setConfigTimer(uint8_t value);
+		bool setUARTBaud(uint8_t baud);
+		bool setSniff(uint8_t hex);
 		bool setBonding(bool en);
-		bool setTransmitPower(int hex);
-		bool setNonStandardBaud(unsigned int multi);
-		bool setProfile(int value);
+		bool setTransmitPower(uint8_t hex);
+		bool setNonStandardBaud(uint8_t multi);
+		bool setProfile(uint8_t value);
 		bool setSerializedFriendlyName(char name[15]);
 		bool setRoleSwitch(bool en);
 		bool setConfigChar(char c);
-		bool setLPConnectMode(int hex);
+		bool setLPConnectMode(uint8_t hex);
 
-		//get commands
+		//Get Commands
 		char *getBasicSettings();
 		char *getExtendedSettings();
 		char *getBluetoothAddress();
@@ -95,23 +97,23 @@ class RN41_42 {
 		char *getStoredRemoteAddress();
 		char *getGPIOStatus();
 
-		//action commands
+		//Action Commands
 		char *displayDipwitchValues();
 		bool connectToStoredAddress();
 		bool connectToAddress(char address[13]);
 		bool connectToAddressFast(char address[13]);
 		bool connectToLastFoundAddressFast();
 		bool connectToStoredRemoteAddressFast();
-		bool connectToAddressTimed(char address[13], int time);
+		bool connectToAddressTimed(char address[13], uint8_t time);
 		bool fastDataMode();
 		char *help();
-		char *performInquiryScan(int time);
-		char *performInquiryScan(int time, int cod);
-		char *performInquiryScanNN(int time);
-		char *performInquiryScanNN(int time, int cod);
+		char *performInquiryScan(uint8_t time);
+		char *performInquiryScan(uint8_t time, uint8_t cod);
+		char *performInquiryScanNN(uint8_t time);
+		char *performInquiryScanNN(uint8_t time, uint8_t cod);
 		char *scanRSSI();
-		char *performRovingInquiryScan(int time);
-		char *performCableReplaceInquiryScan(int time);
+		char *performRovingInquiryScan(uint8_t time);
+		char *performCableReplaceInquiryScan(uint8_t time);
 		bool hidePIN();
 		bool killConnection();
 		char *linkQuality();
@@ -124,6 +126,15 @@ class RN41_42 {
 		char *getFirmwareVersion();
 		bool enableDiscoveryConnection();
 		void sleep();
+
+		//GPIO Commands
+
+#ifdef USE_GPIO
+		bool pinMode(uint8_t pin, uint8_t dir);
+		bool digitalWrite(uint8_t pin, uint8_t val);
+		bool pinModePowerUp(uint8_t pin, uint8_t dir);
+		bool digitalWritePowerUp(uint8_t pin, uint8_t val);
+#endif // USE_GPIO
 
 		//Message Mode
 		bool sendMessage(char message[32]);
@@ -139,8 +150,17 @@ class RN41_42 {
 		unsigned long _baud;
 		char _configChar[1];
 
+#ifdef USE_GPIO
+		byte gpioSet = 0;
+		byte gpioDir = 0;
+		byte gpioVal = 0;
+		byte gpio811 = 0;
+		byte gpioSetPowerUp = 0;
+		byte gpioDirPowerUp = 0;
+		byte gpioValPowerUp = 0;
+#endif // USE_GPIO
+
 		//Private Commands
-		
 		void setupIO();
 		char *buildHexSString(const PROGMEM char* cmd);
 		char *buildSString(const PROGMEM char* cmd, bool isString);
