@@ -29,9 +29,9 @@
 class RN41_42 {
 
 	public:
-
-		RN41_42(HardwareSerial &_serial);
-		RN41_42(HardwareSerial & _serial, char configChar);
+    char recvBuf[32];
+		RN41_42(HardwareSerial& _serial);
+		RN41_42(HardwareSerial& _serial, char configChar);
 		void begin(unsigned long baudrate);
 		void begin();
 		bool enterCommandMode();
@@ -138,13 +138,13 @@ class RN41_42 {
 
 	private:
 
-		HardwareSerial &serial;
+		HardwareSerial& serial;
 
 		//Vaiables
-		char recvBuf[16];
+    
 		bool _commandMode;
 		unsigned long _baud;
-		char _configChar[1];
+		char _configChar[2];
 
 		//GPIO Bitmasks
 		#ifdef USE_GPIO
@@ -166,7 +166,6 @@ class RN41_42 {
 
 		//Recieve Data
 		char *getString();
-		char *getString(char *buffer);
 
 		//Response Check
 		bool isAOK();
