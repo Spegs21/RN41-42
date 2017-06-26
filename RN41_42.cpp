@@ -735,7 +735,7 @@ void RN41_42::passMessage(char mes[33])
 {
 	char buffer[34];
 	strncpy_P(buffer, PSTR("P,"), 3);
-	strncat(buffer, mes, 34);
+	strncat(buffer, mes, sizeof(buffer));
 	serial.println(buffer);
 }
 
@@ -759,7 +759,7 @@ uint8_t RN41_42::quietStatus()
 {
 	if (!_commandMode) { return false; }
 	serial.println(PSTR("Q,?"));
-	return atoi(getstring());
+	return atoi(getString());
 }
 
 //Resets The Device
