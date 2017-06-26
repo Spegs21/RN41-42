@@ -119,6 +119,8 @@ class RN41_42 {
 		char *otherSettings();											//O
 		void passMessage(char mes[33]);									//P
 		bool quietMode();												//Q
+		bool quietMode(uint8_t mode);									//Q,0 or Q,1 or Q,2
+		uint8_t quietStatus();											//Q,?
 		bool reset();													//R,1 or GPIO
 		bool passThrough(bool en);										//T
 		bool uartChangeTemp(char baud[5], char parity);					//U
@@ -177,6 +179,7 @@ class RN41_42 {
 		const PROGMEM char dec[2] = { 'd','\0' };
 		const PROGMEM char pgmHex[4] = { '0','4','X','\0' };
 		const PROGMEM char connected[12] = { 'C','o','n','n','e','c','t','e','d','\r','\n','\0' };
+		const PROGMEM char quiet[8] = { 'Q','u','i','e','t','\r','\n','\0' };
 	};
 
 #endif

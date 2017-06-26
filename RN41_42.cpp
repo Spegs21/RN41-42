@@ -576,7 +576,7 @@ bool RN41_42::connectToStoredAddress()
 {
 	if (!_commandMode) { return false; }
 	serial.println(PSTR("C"));
-	return strncmp_P(getString(), connected, 12) == 0 ? true : false;
+	return strncmp_P(getString(), connected, sizeof(connected)) == 0 ? true : false;
 }
 
 bool RN41_42::connectToAddress(char address[13])
@@ -585,7 +585,7 @@ bool RN41_42::connectToAddress(char address[13])
 	char buffer[15];
 	snprintf_P(buffer, sizeof(buffer), PSTR("C,%S"), address);
 	serial.println(buffer);
-	return strncmp_P(getString(), connected, 12) == 0 ? true : false;
+	return strncmp_P(getString(), connected, sizeof(connected)) == 0 ? true : false;
 }
 
 bool RN41_42::connectToAddressFast(char address[13])
@@ -594,21 +594,21 @@ bool RN41_42::connectToAddressFast(char address[13])
 	char buffer[16];
 	snprintf_P(buffer, sizeof(buffer), PSTR("CF,%S"), address);
 	serial.println(buffer);
-	return strncmp_P(getString(), connected, 12) == 0 ? true : false;
+	return strncmp_P(getString(), connected, sizeof(connected)) == 0 ? true : false;
 }
 
 bool RN41_42::connectToLastFoundAddressFast()
 {
 	if (!_commandMode) { return false; }
 	serial.println(PSTR("CFI"));
-	return strncmp_P(getString(), connected, 12) == 0 ? true : false;
+	return strncmp_P(getString(), connected, sizeof(connected)) == 0 ? true : false;
 }
 
 bool RN41_42::connectToStoredRemoteAddressFast()
 {
 	if (!_commandMode) { return false; }
 	serial.println(PSTR("CFR"));
-	return strncmp_P(getString(), connected, 12) == 0 ? true : false;
+	return strncmp_P(getString(), connected, sizeof(connected)) == 0 ? true : false;
 }
 
 bool RN41_42::connectToAddressTimed(char address[13], uint8_t time)
@@ -617,7 +617,7 @@ bool RN41_42::connectToAddressTimed(char address[13], uint8_t time)
 	char buffer[19];
 	snprintf_P(buffer, sizeof(buffer), PSTR("CT,%S,$d"), address, time);
 	serial.println(buffer);
-	return strncmp_P(getString(), connected, 12) == 0 ? true : false;
+	return strncmp_P(getString(), connected, sizeof(connected)) == 0 ? true : false;
 }
 
 bool RN41_42::fastDataMode()
@@ -743,7 +743,23 @@ bool RN41_42::quietMode()
 {
 	if (!_commandMode) { return false; }
 	serial.println(PSTR("Q"));
-	return strncmp_P(getString(), PSTR("QUIET\r\n"), 8) == 0 ? true : false;
+	return strncmp_P(getString(), quiet, sizeof(quiet)) == 0 ? true : false;
+}
+
+bool RN41_42::quietMode(uint8_t mode)
+{
+	if (!(mode >= 0 && mode <= 2) || !_commandMode) { return false; }
+	char buffer[4];
+	snprintf_P(buffer, sizeof(buffer), PSTR("Q,$d"), mode);
+	serial.println(buffer);
+	return strncmp_P(getString(), quiet, sizeof(quiet)) == 0 ? true : false;
+}
+
+uint8_t RN41_42::quietStatus()
+{
+	if (!_commandMode) { return false; }
+	serial.println(PSTR("Q,?"));
+	return atoi(getstring());
 }
 
 //Resets The Device
