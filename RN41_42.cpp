@@ -13,26 +13,26 @@ RN41_42::RN41_42(HardwareSerial& _serial) : serial(_serial) {
   _commandMode = false;
   _configChar[0] = '$';
   _configChar[1] = '\0';
-  setupIO();
 }
 
 RN41_42::RN41_42(HardwareSerial& _serial, char configChar) : serial(_serial) {
   _commandMode = false;
   _configChar[0] = configChar;
   _configChar[1] = '\0';
-  setupIO();
 }
 
 void RN41_42::begin(unsigned long baudrate)
 {
   _baud = baudrate;
   serial.begin(_baud);
+  setupIO();
 }
 
 void RN41_42::begin()
 {
   _baud = 115200;
   serial.begin(_baud);
+  setupIO();
 }
 
 //Enter Command Mode
@@ -978,33 +978,33 @@ char *RN41_42::getString()
 void RN41_42::setupIO()
 {
 #ifdef RN41_42_RESET
-  pinMode(RN41_42_RESET, OUTPUT);
-  digitalWrite(RN41_42_RESET, HIGH);
+  ::pinMode(RN41_42_RESET, OUTPUT);
+  ::digitalWrite(RN41_42_RESET, HIGH);
 #endif // RN41_42_RESET_PIN
 
 #ifdef RN41_42_GPIO2
-  pinMode(RN41_42_GPIO2, INPUT);
-  digitalWrite(RN41_42_GPIO2, HIGH);
+  ::pinMode(RN41_42_GPIO2, INPUT);
+  ::digitalWrite(RN41_42_GPIO2, HIGH);
 #endif // RN41_42_CONN_PIN
 
 #ifdef RN41_42_GPIO4
-  pinMode(RN41_42_GPIO4, OUTPUT);
-  digitalWrite(RN41_42_GPIO4, LOW);
+  ::pinMode(RN41_42_GPIO4, OUTPUT);
+  ::digitalWrite(RN41_42_GPIO4, LOW);
 #endif // RN41_42_GPIO4
 
 #ifdef RN41_42_GPIO3
-  pinMode(RN41_42_GPIO3, OUTPUT);
-  digitalWrite(RN41_42_GPIO3, LOW);
+  ::pinMode(RN41_42_GPIO3, OUTPUT);
+  ::digitalWrite(RN41_42_GPIO3, LOW);
 #endif // RN41_42_GPIO3
 
 #ifdef RN41_42_GPIO6
-  pinMode(RN41_42_GPIO6, OUTPUT);
-  digitalWrite(RN41_42_GPIO6, LOW);
+  ::pinMode(RN41_42_GPIO6, OUTPUT);
+  ::digitalWrite(RN41_42_GPIO6, LOW);
 #endif // RN41_42_GPIO6
 
 #ifdef RN41_42_GPIO7
-  pinMode(RN41_42_GPIO7, OUTPUT);
-  digitalWrite(RN41_42_GPIO7, LOW);
+  ::pinMode(RN41_42_GPIO7, OUTPUT);
+  ::digitalWrite(RN41_42_GPIO7, LOW);
 #endif // RN41_42_GPIO
 }
 
