@@ -24,7 +24,7 @@
 #include "WProgram.h"
 #endif
 
-class RN41_42 {
+class RN41_42{
 
 public:
   char recvBuf[32];
@@ -34,7 +34,8 @@ public:
   void begin();
   bool enterCommandMode();
   bool exitCommandMode();
-  bool sendMessage(char message[33]);
+  int sendMessage(char message[32]);
+  int sendChar(char c);
   char *recieveMessage();
 
   //Dipswitch/GPIO Functions
@@ -115,7 +116,7 @@ public:
   char *linkQuality();											//L
   char *remoteModemSignalStatus();								//M
   char *otherSettings();										//O
-  void passMessage(char mes[33]);								//P
+  void passMessage(char mes[32]);								//P
   bool quietMode();												//Q
   bool quietMode(uint8_t mode);									//Q,0 or Q,1 or Q,2
   uint8_t quietStatus();										//Q,?

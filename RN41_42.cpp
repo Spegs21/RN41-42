@@ -40,7 +40,7 @@ bool RN41_42::enterCommandMode()
 {
   if (_commandMode) { return true; }
   for (int i = 0; i < 3; i++) { serial.print(_configChar); }
-  delay(50);
+  serial.flush();
   if (strncmp_P(getString(), PSTR("CMD\r\n"), 6) == 0) { _commandMode = true; return true; }
   return false;
 }
@@ -50,16 +50,25 @@ bool RN41_42::exitCommandMode()
 {
   if (!_commandMode) { return true; }
   serial.println(F("---"));
-  delay(50);
+  serial.flush();
   if (strncmp_P(getString(), PSTR("END\r\n"), 6) == 0) { _commandMode = false; return true; }
   return false;
 }
 
-bool RN41_42::sendMessage(char message[33])
+int RN41_42::sendMessage(char message[32])
 {
-  if (_commandMode) { return false; }
+  if (_commandMode) { return -1; }
   serial.println(message);
-  return true;
+  serial.flush();
+  return sizeof(message);
+}
+
+int RN41_42::sendChar(char c)
+{
+    if (_commandMode) { return -1; }
+    serial.print(c);
+    serial.flush();
+    return sizeof(c);
 }
 
 char *RN41_42::recieveMessage()
@@ -73,16 +82,16 @@ char *RN41_42::recieveMessage()
 #ifdef RN41_42_GPIO4
 void RN41_42::factoryReset()
 {
-  digitalWrite(RN41_42_GPIO4, HIGH);
+  ::digitalWrite(RN41_42_GPIO4, HIGH);
   reset();
   delay(500);
-  digitalWrite(RN41_42_GPIO4, LOW);
+  ::digitalWrite(RN41_42_GPIO4, LOW);
   delay(1000);
-  digitalWrite(RN41_42_GPIO4, HIGH);
-  digitalWrite(RN41_42_GPIO4, LOW);
+  ::digitalWrite(RN41_42_GPIO4, HIGH);
+  ::digitalWrite(RN41_42_GPIO4, LOW);
   delay(1000);
-  digitalWrite(RN41_42_GPIO4, HIGH);
-  digitalWrite(RN41_42_GPIO4, LOW);
+  ::digitalWrite(RN41_42_GPIO4, HIGH);
+  ::digitalWrite(RN41_42_GPIO4, LOW);
   reset();
 }
 #endif // RN41_42_GPIO4
@@ -90,21 +99,21 @@ void RN41_42::factoryReset()
 #ifdef RN41_42_GPIO3
 void RN41_42::autoDiscoveryPairing(bool en)
 {
-  digitalWrite(RN41_42_GPIO3, en);
+  ::digitalWrite(RN41_42_GPIO3, en);
 }
 #endif // RN41_42_GPIO3
 
 #ifdef RN41_42_GPIO6
 void RN41_42::autoConnect(bool en)
 {
-  digitalWrite(RN41_42_GPIO6, en);
+  ::digitalWrite(RN41_42_GPIO6, en);
 }
 #endif // RN41_42_GPIO6
 
 #ifdef RN41_42_GPIO7
 void RN41_42::setBaudRate9600(bool en)
 {
-  digitalWrite(RN41_42_GPIO7, en);
+  ::digitalWrite(RN41_42_GPIO7, en);
 }
 #endif // RN41_42_GPIO7
 
@@ -118,7 +127,7 @@ bool RN41_42::setS7(bool en)
   char buffer[5];
   snprintf(buffer, sizeof(buffer), buildSString(PSTR("7"), false), en);
   serial.println(buffer);
-  delay(50);
+  serial.flush();
   return isAOK();
 }
 
@@ -136,7 +145,7 @@ bool RN41_42::setAuthenticationMode(uint8_t authMode)
   char buffer[5];
   snprintf(buffer, sizeof(buffer), buildSString(PSTR("A"), false), authMode);
   serial.println(buffer);
-  delay(50);
+  serial.flush();
   return isAOK();
 }
 
@@ -148,7 +157,7 @@ bool RN41_42::setBreak(uint8_t breakVal)
   char buffer[5];
   snprintf(buffer, sizeof(buffer), buildSString(PSTR("B"), false), breakVal);
   serial.println(buffer);
-  delay(50);
+  serial.flush();
   return isAOK();
 }
 
@@ -160,7 +169,7 @@ bool RN41_42::setServiceClass(uint16_t hex)
   char buffer[8];
   snprintf(buffer, sizeof(buffer), buildHexSString(PSTR("C")), hex);
   serial.println(buffer);
-  delay(50);
+  serial.flush();
   return isAOK();
 }
 
@@ -173,7 +182,7 @@ bool RN41_42::setDeviceClass(uint16_t hex)
   char buffer[8];
   snprintf(buffer, sizeof(buffer), buildHexSString(PSTR("D")), hex);
   serial.println(buffer);
-  delay(50);
+  serial.flush();
   return isAOK();
 }
 
@@ -185,7 +194,7 @@ bool RN41_42::setUUID(char hex[32])
   char buffer[35];
   snprintf(buffer, sizeof(buffer), buildSString(PSTR("E"), true), hex);
   serial.println(buffer);
-  delay(50);
+  serial.flush();
   return isAOK();
 }
 
@@ -197,7 +206,7 @@ bool RN41_42::restoreFactoryDefaults()
   char buffer[5];
   snprintf(buffer, sizeof(buffer), buildSString(PSTR("F"), false), 1);
   serial.println(buffer);
-  delay(50);
+  serial.flush();
   return isAOK();
 }
 
@@ -209,7 +218,7 @@ bool RN41_42::setHIDRegister(uint16_t hex)
   char buffer[8];
   snprintf(buffer, sizeof(buffer), buildHexSString(PSTR("H")), hex);
   serial.println(buffer);
-  delay(50);
+  serial.flush();
   return isAOK();
 }
 
@@ -221,7 +230,7 @@ bool RN41_42::setInquiryScanWindow(uint16_t hex)
   char buffer[8];
   snprintf(buffer, sizeof(buffer), buildHexSString(PSTR("I")), hex);
   serial.println(buffer);
-  delay(50);
+  serial.flush();
   return isAOK();
 }
 
@@ -233,7 +242,7 @@ bool RN41_42::setPageScanWindow(uint16_t hex)
   char buffer[8];
   snprintf(buffer, sizeof(buffer), buildHexSString(PSTR("J")), hex);
   serial.println(buffer);
-  delay(50);
+  serial.flush();
   return isAOK();
 }
 
@@ -245,7 +254,7 @@ bool RN41_42::setUARTParity(char parity)
   char buffer[5];
   snprintf(buffer, sizeof(buffer), buildSString(PSTR("L"), true), parity);
   serial.println(buffer);
-  delay(50);
+  serial.flush();
   return isAOK();
 }
 
@@ -266,7 +275,7 @@ bool RN41_42::setMode(unsigned int mode)
   char buffer[5];
   snprintf(buffer, sizeof(buffer), buildSString(PSTR("M"), false), mode);
   serial.println(buffer);
-  delay(50);
+  serial.flush();
   return isAOK();
 }
 
@@ -279,7 +288,7 @@ bool RN41_42::setDeviceName(char name[21])
   char buffer[24];
   snprintf(buffer, sizeof(buffer), buildSString(PSTR("N"), true), name);
   serial.println(buffer);
-  delay(50);
+  serial.flush();
   return isAOK();
 }
 
@@ -292,7 +301,7 @@ bool RN41_42::setExtendedStatusString(char name[9])
   char buffer[12];
   snprintf(buffer, sizeof(buffer), buildSString(PSTR("O"), true), name);
   serial.println(buffer);
-  delay(50);
+  serial.flush();
   return isAOK();
 }
 
@@ -304,7 +313,7 @@ bool RN41_42::setPinCode(char pin[5])
   char buffer[8];
   snprintf(buffer, sizeof(buffer), buildSString(PSTR("P"), true), pin);
   serial.println(buffer);
-  delay(50);
+  serial.flush();
   return isAOK();
 }
 
@@ -324,7 +333,7 @@ bool RN41_42::setMask(uint8_t mask)
   case 256:
     snprintf(buffer, sizeof(buffer), buildSString(PSTR("Q"), false), mask);
     serial.println(buffer);
-    delay(50);
+    serial.flush();
     return isAOK();
   default:
     return false;
@@ -339,7 +348,7 @@ bool RN41_42::setRemoteAddress(char address[13])
   char buffer[16];
   snprintf(buffer, sizeof(buffer), buildSString(PSTR("R"), true), address);
   serial.println(buffer);
-  delay(50);
+  serial.flush();
   return isAOK();
 }
 
@@ -351,7 +360,7 @@ bool RN41_42::eraseRemoteAddress()
   char buffer[5];
   snprintf(buffer, sizeof(buffer), buildSString(PSTR("R"), true), "Z");
   serial.println(buffer);
-  delay(50);
+  serial.flush();
   return isAOK();
 }
 
@@ -363,7 +372,7 @@ bool RN41_42::setRemoteAddressLastObserved()
   char buffer[5];
   snprintf(buffer, sizeof(buffer), buildSString(PSTR("R"), true), "I");
   serial.println(buffer);
-  delay(50);
+  serial.flush();
   return isAOK();
 }
 
@@ -375,7 +384,7 @@ bool RN41_42::setServiceName(char name[21])
   char buffer[24];
   snprintf(buffer, sizeof(buffer), buildSString(PSTR("S"), true), name);
   serial.println(buffer);
-  delay(50);
+  serial.flush();
   return isAOK();
 }
 
@@ -387,7 +396,7 @@ bool RN41_42::setConfigTimer(uint8_t value)
   char buffer[7];
   snprintf(buffer, sizeof(buffer), buildSString(PSTR("T"), false), value);
   serial.println(buffer);
-  delay(50);
+  serial.flush();
   return isAOK();
 }
 
@@ -412,7 +421,7 @@ bool RN41_42::setUARTBaud(uint8_t baud)
   case 92:
     snprintf(buffer, sizeof(buffer), buildSString(PSTR("U"), false), baud);
     serial.println(buffer);
-    delay(50);
+    serial.flush();
     return isAOK();
   default:
     return false;
@@ -427,7 +436,7 @@ bool RN41_42::setSniff(uint16_t hex)
   char buffer[8];
   snprintf(buffer, sizeof(buffer), buildHexSString(PSTR("W")), hex);
   serial.println(buffer);
-  delay(50);
+  serial.flush();
   return isAOK();
 }
 
@@ -439,7 +448,7 @@ bool RN41_42::setBonding(bool en)
   char buffer[5];
   snprintf(buffer, sizeof(buffer), buildSString(PSTR("X"), false), (int)en);
   serial.println(buffer);
-  delay(50);
+  serial.flush();
   return isAOK();
 }
 
@@ -451,7 +460,7 @@ bool RN41_42::setTransmitPower(uint16_t hex)
   char buffer[8];
   snprintf(buffer, sizeof(buffer), buildHexSString(PSTR("Y")), hex);
   serial.println(buffer);
-  delay(50);
+  serial.flush();
   return isAOK();
 }
 
@@ -463,7 +472,7 @@ bool RN41_42::setNonStandardBaud(uint8_t multi)
   char buffer[6];
   snprintf(buffer, sizeof(buffer), buildSString(PSTR("Z"), false), multi);
   serial.println(buffer);
-  delay(50);
+  serial.flush();
   return isAOK();
 }
 
@@ -475,7 +484,7 @@ bool RN41_42::setProfile(uint8_t value) {
   enterCommandMode();
   snprintf(buffer, sizeof(buffer), buildSString(PSTR("~"), false), value);
   serial.println(buffer);
-  delay(50);
+  serial.flush();
   return isAOK();
 }
 
@@ -487,7 +496,7 @@ bool RN41_42::setSerializedFriendlyName(char name[16])
   char buffer[19];
   snprintf(buffer, sizeof(buffer), buildSString(PSTR("-"), true), name);
   serial.println(buffer);
-  delay(50);
+  serial.flush();
   return isAOK();
 }
 
@@ -499,7 +508,7 @@ bool RN41_42::setRoleSwitch(bool en)
   char buffer[5];
   snprintf(buffer, sizeof(buffer), buildSString(PSTR("?"), false), en);
   serial.println(buffer);
-  delay(50);
+  serial.flush();
   return isAOK();
 }
 
@@ -511,7 +520,7 @@ bool RN41_42::setConfigChar(char c)
   char buffer[5];
   snprintf(buffer, sizeof(buffer), buildSString(PSTR("$"), true), c);
   serial.println(buffer);
-  delay(50);
+  serial.flush();
   if (isAOK()) { _configChar[0] = c; return true; }
   return false;
 }
@@ -524,7 +533,7 @@ bool RN41_42::setLPConnectMode(uint8_t hex)
   char buffer[8];
   snprintf(buffer, sizeof(buffer), buildHexSString(PSTR("|")), hex);
   serial.println(buffer);
-  delay(50);
+  serial.flush();
   return isAOK();
 }
 
@@ -534,7 +543,7 @@ char *RN41_42::getBasicSettings()
 {
   if (!_commandMode) { return false; }
   serial.println(F("D"));
-  delay(50);
+  serial.flush();
   return getString();
 }
 
@@ -544,7 +553,7 @@ char *RN41_42::getExtendedSettings()
 {
   if (!_commandMode) { return false; }
   serial.println(F("E"));
-  delay(50);
+  serial.flush();
   return getString();
 }
 
@@ -554,7 +563,7 @@ char *RN41_42::getBluetoothAddress()
 {
   if (!_commandMode) { return false; }
   serial.println(F("GB"));
-  delay(50);
+  serial.flush();
   return getString();
 }
 
@@ -564,7 +573,7 @@ char *RN41_42::getConnectedRemoteAddress()
 {
   if (!_commandMode) { return false; }
   serial.println(F("GF"));
-  delay(50);
+  serial.flush();
   return getString();
 }
 
@@ -580,7 +589,7 @@ bool RN41_42::getConnectionStatus()
 #else
   if (!_commandMode) { return false; }
   serial.println(F("GK"));
-  delay(50);
+  serial.flush();
   return strncmp_P(getString(), PSTR("1,0,0\r\n"), 8) == 0 ? true : false;
 #endif // RN41_42_CONN_PIN
 }
@@ -591,7 +600,7 @@ char  *RN41_42::getStoredRemoteAddress()
 {
   if (!_commandMode) { return false; }
   serial.println(F("GR"));
-  delay(50);
+  serial.flush();
   return getString();
 }
 
@@ -601,7 +610,7 @@ char *RN41_42::getGPIOStatus()
 {
   if (!_commandMode) { return false; }
   serial.println(F("G&"));
-  delay(50);
+  serial.flush();
   return getString();
 }
 
@@ -609,7 +618,7 @@ char * RN41_42::displayDipwitchValues()
 {
   if (!_commandMode) { return false; }
   serial.print(F("&"));
-  delay(50);
+  serial.flush();
   return getString();
 }
 
@@ -617,7 +626,7 @@ bool RN41_42::connectToStoredAddress()
 {
   if (!_commandMode) { return false; }
   serial.println(F("C"));
-  delay(50);
+  serial.flush();
   return strncmp_P(getString(), connected, sizeof(connected)) == 0 ? true : false;
 }
 
@@ -627,7 +636,7 @@ bool RN41_42::connectToAddress(char address[13])
   char buffer[15];
   snprintf_P(buffer, sizeof(buffer), PSTR("C,%S"), address);
   serial.println(buffer);
-  delay(50);
+  serial.flush();
   return strncmp_P(getString(), connected, sizeof(connected)) == 0 ? true : false;
 }
 
@@ -637,7 +646,7 @@ bool RN41_42::connectToAddressFast(char address[13])
   char buffer[16];
   snprintf_P(buffer, sizeof(buffer), PSTR("CF,%S"), address);
   serial.println(buffer);
-  delay(50);
+  serial.flush();
   return strncmp_P(getString(), connected, sizeof(connected)) == 0 ? true : false;
 }
 
@@ -645,7 +654,7 @@ bool RN41_42::connectToLastFoundAddressFast()
 {
   if (!_commandMode) { return false; }
   serial.println(F("CFI"));
-  delay(50);
+  serial.flush();
   return strncmp_P(getString(), connected, sizeof(connected)) == 0 ? true : false;
 }
 
@@ -653,7 +662,7 @@ bool RN41_42::connectToStoredRemoteAddressFast()
 {
   if (!_commandMode) { return false; }
   serial.println(F("CFR"));
-  delay(50);
+  serial.flush();
   return strncmp_P(getString(), connected, sizeof(connected)) == 0 ? true : false;
 }
 
@@ -663,7 +672,7 @@ bool RN41_42::connectToAddressTimed(char address[13], uint8_t time)
   char buffer[19];
   snprintf_P(buffer, sizeof(buffer), PSTR("CT,%S,$d"), address, time);
   serial.println(buffer);
-  delay(50);
+  serial.flush();
   return strncmp_P(getString(), connected, sizeof(connected)) == 0 ? true : false;
 }
 
@@ -672,7 +681,7 @@ bool RN41_42::fastDataMode()
   if (!_commandMode) { return false; }
   serial.println(F("F,1"));
   _commandMode = false;
-  delay(50);
+  serial.flush();
   return true;
 }
 
@@ -680,7 +689,7 @@ char * RN41_42::help()
 {
   if (!_commandMode) { return false; }
   serial.println(F("H"));
-  delay(50);
+  serial.flush();
   return getString();
 }
 
@@ -690,7 +699,7 @@ char * RN41_42::performInquiryScan(uint8_t time)
   char buffer[5];
   snprintf_P(buffer, sizeof(buffer), PSTR("I,$d"), time);
   serial.println(buffer);
-  delay(50);
+  serial.flush();
   return getString();
 }
 
@@ -700,7 +709,7 @@ char * RN41_42::performInquiryScan(uint8_t time, uint32_t cod)
   char buffer[11];
   snprintf_P(buffer, sizeof(buffer), PSTR("I,$d,%06X"), time, cod);
   serial.println(buffer);
-  delay(50);
+  serial.flush();
   return getString();
 }
 
@@ -710,7 +719,7 @@ char * RN41_42::performInquiryScanNN(uint8_t time)
   char buffer[5];
   snprintf_P(buffer, sizeof(buffer), PSTR("IN$d"), time);
   serial.println(buffer);
-  delay(50);
+  serial.flush();
   return getString();
 }
 
@@ -720,7 +729,7 @@ char * RN41_42::performInquiryScanNN(uint8_t time, uint32_t cod)
   char buffer[11];
   snprintf_P(buffer, sizeof(buffer), PSTR("IN$d,%06X"), time, cod);
   serial.println(buffer);
-  delay(50);
+  serial.flush();
   return getString();
 }
 
@@ -728,7 +737,7 @@ char * RN41_42::scanRSSI()
 {
   if (!_commandMode) { return false; }
   serial.println(F("IQ"));
-  delay(50);
+  serial.flush();
   return getString();
 }
 
@@ -738,7 +747,7 @@ char * RN41_42::performRovingInquiryScan(uint8_t time)
   char buffer[5];
   snprintf_P(buffer, sizeof(buffer), PSTR("IS$d"), time);
   serial.println(buffer);
-  delay(50);
+  serial.flush();
   return getString();
 }
 
@@ -748,7 +757,7 @@ char * RN41_42::performCableReplaceInquiryScan(uint8_t time)
   char buffer[5];
   snprintf_P(buffer, sizeof(buffer), PSTR("IR$d"), time);
   serial.println(buffer);
-  delay(50);
+  serial.flush();
   return getString();
 }
 
@@ -756,7 +765,7 @@ bool RN41_42::hidePIN()
 {
   if (!_commandMode) { return false; }
   serial.println(F("J"));
-  delay(50);
+  serial.flush();
   return true;
 }
 
@@ -764,7 +773,7 @@ bool RN41_42::killConnection()
 {
   if (!_commandMode) { return false; }
   serial.println(F("K,"));
-  delay(50);
+  serial.flush();
   return strncmp_P(getString(), PSTR("KILL\r\n"), 7) == 0 ? true : false;
 }
 
@@ -772,7 +781,7 @@ char * RN41_42::linkQuality()
 {
   if (!_commandMode) { return false; }
   serial.println(F("L"));
-  delay(50);
+  serial.flush();
   return getString();
 }
 
@@ -780,7 +789,7 @@ char * RN41_42::remoteModemSignalStatus()
 {
   if (!_commandMode) { return false; }
   serial.println(F("M"));
-  delay(50);
+  serial.flush();
   return getString();
 }
 
@@ -788,23 +797,24 @@ char * RN41_42::otherSettings()
 {
   if (!_commandMode) { return false; }
   serial.println(F("O"));
-  delay(50);
+  serial.flush();
   return getString();
 }
 
-void RN41_42::passMessage(char mes[33])
+void RN41_42::passMessage(char mes[32])
 {
   char buffer[34];
   strncpy_P(buffer, PSTR("P,"), 3);
   strncat(buffer, mes, sizeof(buffer));
   serial.println(buffer);
+  serial.flush();
 }
 
 bool RN41_42::quietMode()
 {
   if (!_commandMode) { return false; }
   serial.println(F("Q"));
-  delay(50);
+  serial.flush();
   return strncmp_P(getString(), quiet, sizeof(quiet)) == 0 ? true : false;
 }
 
@@ -814,7 +824,7 @@ bool RN41_42::quietMode(uint8_t mode)
   char buffer[4];
   snprintf_P(buffer, sizeof(buffer), PSTR("Q,$d"), mode);
   serial.println(buffer);
-  delay(50);
+  serial.flush();
   return strncmp_P(getString(), quiet, sizeof(quiet)) == 0 ? true : false;
 }
 
@@ -822,7 +832,7 @@ uint8_t RN41_42::quietStatus()
 {
   if (!_commandMode) { return false; }
   serial.println(F("Q,?"));
-  delay(50);
+  serial.flush();
   return atoi(getString());
 }
 
@@ -833,14 +843,14 @@ uint8_t RN41_42::quietStatus()
 bool RN41_42::reset()
 {
 #ifdef RN41_42_RESET
-  digitalWrite(RN41_42_RESET, LOW);
+  ::digitalWrite(RN41_42_RESET, LOW);
   delay(100);
-  digitalWrite(RN41_42_RESET, HIGH);
+  ::digitalWrite(RN41_42_RESET, HIGH);
   return true;
 #else
   if (!_commandMode) { return false; }
   serial.println(F("R,1"));
-  delay(50);
+  serial.flush();
   if (strcmp_P(getString(), PSTR("Reboot!\r\n")) == 0) { _commandMode = false; return true; }
   return false;
 
@@ -853,7 +863,7 @@ bool RN41_42::passThrough(bool en)
   char buffer[4];
   snprintf_P(buffer, sizeof(buffer), PSTR("T,$d"), en);
   serial.println(buffer);
-  delay(50);
+  serial.flush();
   return true;
 }
 
@@ -863,7 +873,7 @@ bool RN41_42::uartChangeTemp(char baud[5], char parity)
   char buffer[9];
   snprintf_P(buffer, sizeof(buffer), PSTR("U,%S,%S"), baud, parity);
   serial.println(buffer);
-  delay(50);
+  serial.flush();
   if (isAOK()) { _commandMode = false; return true; }
   return false;
 }
@@ -874,7 +884,7 @@ char *RN41_42::getFirmwareVersion()
 {
   if (!_commandMode) { return false; }
   serial.println(F("V"));
-  delay(50);
+  serial.flush();
   return getString();
 }
 
@@ -882,7 +892,7 @@ bool RN41_42::enableDiscoveryConnection()
 {
   if (!_commandMode) { return false; }
   serial.println(F("W"));
-  delay(50);
+  serial.flush();
   return true;
 }
 
@@ -891,6 +901,7 @@ bool RN41_42::enableDiscoveryConnection()
 void RN41_42::sleep()
 {
   serial.println(F("Z"));
+  serial.flush();
   _commandMode = false;
 }
 
@@ -906,7 +917,7 @@ bool RN41_42::pinMode(uint8_t pin, uint8_t dir)
   char buffer[8];
   snprintf_P(buffer, sizeof(buffer), PSTR("S@,%02X%02X"), gpioSetDir, gpioDir);
   serial.println(buffer);
-  delay(50);
+  serial.flush();
   return true;
 }
 
@@ -929,7 +940,7 @@ bool RN41_42::digitalWrite(uint8_t pin, uint8_t val)
     snprintf_P(buffer, sizeof(buffer), PSTR("S*,%02X%02X"), (gpio811 >> 4), (gpio811 & 0xF));
   }
   serial.println(buffer);
-  delay(50);
+  serial.flush();
   return true;
 }
 
@@ -943,7 +954,7 @@ bool RN41_42::pinModePowerUp(uint8_t pin, uint8_t dir)
   char buffer[8];
   snprintf_P(buffer, sizeof(buffer), PSTR("S%,%02X%02X"), gpioSetDirPowerUp, gpioDirPowerUp);
   serial.println(buffer);
-  delay(50);
+  serial.flush();
   return true;
 }
 
@@ -957,7 +968,7 @@ bool RN41_42::digitalWritePowerUp(uint8_t pin, uint8_t val)
   char buffer[8];
   snprintf_P(buffer, sizeof(buffer), PSTR("S^,%02X%02X"), gpioSetValPowerUp, gpioValPowerUp);
   serial.println(buffer);
-  delay(50);
+  serial.flush();
   return true;
 }
 
@@ -965,6 +976,7 @@ bool RN41_42::digitalWritePowerUp(uint8_t pin, uint8_t val)
 
 char *RN41_42::getString()
 {
+  delay(50);
   int i = 0;
   while (serial.available() > 0)
   {
