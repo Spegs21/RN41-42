@@ -590,7 +590,7 @@ bool RN41_42::getConnectionStatus()
   if (!_commandMode) { return false; }
   serial.println(F("GK"));
   serial.flush();
-  return strncmp_P(getString(), PSTR("1,0,0\r\n"), 8) == 0 ? true : false;
+  return strncmp_P(getString(), PSTR("1\r\n"), 8) == 0 ? true : false;
 #endif // RN41_42_CONN_PIN
 }
 
