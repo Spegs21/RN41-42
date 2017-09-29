@@ -35,8 +35,8 @@ public:
   void end();
   bool enterCommandMode();
   bool exitCommandMode();
-  int sendMessage(char message[32]);
-  int sendChar(char c);
+  void sendMessage(char message[32]);
+  void sendChar(char c);
   char *recieveMessage();
   int available();
   char read();
@@ -145,18 +145,20 @@ private:
   //Vaiables
   HardwareSerial& serial;
   bool _commandMode;
+  unsigned long _baud;
   char _configChar[2];
+  char sBuf[10];
 
   //GPIO Bitmasks
-  static uint8_t gpioSetDir;
-  static uint8_t gpioDir;
-  static uint8_t gpioSetVal;
-  static uint8_t gpioVal;
-  static uint8_t gpio811;
-  static uint8_t gpioSetDirPowerUp;
-  static uint8_t gpioDirPowerUp;
-  static uint8_t gpioSetValPowerUp;
-  static uint8_t gpioValPowerUp;
+  uint8_t gpioSetDir = 0U;
+  uint8_t gpioDir = 0U;
+  uint8_t gpioSetVal = 0U;
+  uint8_t gpioVal = 0U;
+  uint8_t gpio811 = 0U;
+  uint8_t gpioSetDirPowerUp = 0U;
+  uint8_t gpioDirPowerUp = 0U;
+  uint8_t gpioSetValPowerUp = 0U;
+  uint8_t gpioValPowerUp = 0U;
 
   //Private Commands
   void setupIO();
@@ -168,6 +170,7 @@ private:
   bool isAOK();
 
   //Constants
+  const PROGMEM char connected[12] = { 'C','o','n','n','e','c','t','e','d','\r','\n','\0' };
   const PROGMEM char quiet[8] = { 'Q','u','i','e','t','\r','\n','\0' };
 };
 
