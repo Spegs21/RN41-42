@@ -11,9 +11,9 @@
 #define _RN41_42_h
 
 //Define pin to pin connections
-#define RN41_42_RESET  PIN_A6     //Reset
-//#define RN41_42_GPIO2           //Connection State
-//#define RN41_42_GPIO3           //Auto Discovery/Pairing
+#define RN41_42_RESET 10          //Reset
+#define RN41_42_GPIO2 7           //Connection State
+#define RN41_42_GPIO3 3           //Auto Discovery/Pairing
 //#define RN41_42_GPIO4           //Factory Reset
 //#define RN41_42_GPIO6           //Auto-Connect
 //#define RN41_42_GPIO7           //Baud Rate
@@ -32,11 +32,18 @@ public:
   RN41_42(HardwareSerial& _serial, char configChar);
   void begin(unsigned long baudrate);
   void begin();
+  void end();
   bool enterCommandMode();
   bool exitCommandMode();
   int sendMessage(char message[32]);
   int sendChar(char c);
   char *recieveMessage();
+  int available();
+  char read();
+
+#ifdef RN41_42_RESET
+  void wakeup();
+#endif
 
   //Dipswitch/GPIO Functions
 #ifdef RN41_42_GPIO4
@@ -138,25 +145,21 @@ private:
   //Vaiables
   HardwareSerial& serial;
   bool _commandMode;
-  unsigned long _baud;
   char _configChar[2];
-  char sBuf[10];
 
   //GPIO Bitmasks
-  uint8_t gpioSetDir = 0U;
-  uint8_t gpioDir = 0U;
-  uint8_t gpioSetVal = 0U;
-  uint8_t gpioVal = 0U;
-  uint8_t gpio811 = 0U;
-  uint8_t gpioSetDirPowerUp = 0U;
-  uint8_t gpioDirPowerUp = 0U;
-  uint8_t gpioSetValPowerUp = 0U;
-  uint8_t gpioValPowerUp = 0U;
+  static uint8_t gpioSetDir;
+  static uint8_t gpioDir;
+  static uint8_t gpioSetVal;
+  static uint8_t gpioVal;
+  static uint8_t gpio811;
+  static uint8_t gpioSetDirPowerUp;
+  static uint8_t gpioDirPowerUp;
+  static uint8_t gpioSetValPowerUp;
+  static uint8_t gpioValPowerUp;
 
   //Private Commands
   void setupIO();
-  char *buildHexSString(const PROGMEM char* cmd);
-  char *buildSString(const PROGMEM char* cmd, bool isString);
 
   //Recieve Data
   char *getString();
@@ -165,13 +168,6 @@ private:
   bool isAOK();
 
   //Constants
-  const PROGMEM char S[2] = { 'S','\0' };
-  const PROGMEM char commaPercent[3] = { ',','%','\0' };
-  const PROGMEM char comma[2] = { ',','\0' };
-  const PROGMEM char str[2] = { 's','\0' };
-  const PROGMEM char dec[2] = { 'd','\0' };
-  const PROGMEM char pgmHex[4] = { '0','4','X','\0' };
-  const PROGMEM char connected[12] = { 'C','o','n','n','e','c','t','e','d','\r','\n','\0' };
   const PROGMEM char quiet[8] = { 'Q','u','i','e','t','\r','\n','\0' };
 };
 

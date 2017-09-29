@@ -7,34 +7,54 @@
 
 #include "RN41_42.h"
 
-
+uint8_t gpioSetDir = 0U;
+uint8_t gpioDir = 0U;
+uint8_t gpioSetVal = 0U;
+uint8_t gpioVal = 0U;
+uint8_t gpio811 = 0U;
+uint8_t gpioSetDirPowerUp = 0U;
+uint8_t gpioDirPowerUp = 0U;
+uint8_t gpioSetValPowerUp = 0U;
+uint8_t gpioValPowerUp = 0U;
 
 RN41_42::RN41_42(HardwareSerial& _serial) : serial(_serial) {
   _commandMode = false;
   _configChar[0] = '$';
   _configChar[1] = '\0';
+  setupIO();
 }
 
 RN41_42::RN41_42(HardwareSerial& _serial, char configChar) : serial(_serial) {
   _commandMode = false;
   _configChar[0] = configChar;
   _configChar[1] = '\0';
+  setupIO();
 }
 
 void RN41_42::begin(unsigned long baudrate)
 {
-  _baud = baudrate;
-  serial.begin(_baud);
-  setupIO();
+  serial.begin(baudrate);
 }
 
 void RN41_42::begin()
 {
-  _baud = 115200;
-  serial.begin(_baud);
-  setupIO();
+  serial.begin(115200);
 }
 
+void RN41_42::end()
+{
+    serial.end();
+}
+
+int RN41_42::available()
+{
+    return serial.available();
+}
+
+char RN41_42::read()
+{
+    return serial.read();
+}
 //Enter Command Mode
 bool RN41_42::enterCommandMode()
 {
@@ -124,8 +144,8 @@ void RN41_42::setBaudRate9600(bool en)
 bool RN41_42::setS7(bool en)
 {
   if (!_commandMode) { return false; }
-  char buffer[5];
-  snprintf(buffer, sizeof(buffer), buildSString(PSTR("7"), false), en);
+  static char buffer[5];
+  snprintf_P(buffer, sizeof(buffer), PSTR("S7,%d"), en);
   serial.println(buffer);
   serial.flush();
   return isAOK();
@@ -142,8 +162,8 @@ bool RN41_42::setS7(bool en)
 bool RN41_42::setAuthenticationMode(uint8_t authMode)
 {
   if (!(authMode >= 0 && authMode <= 4 && authMode != 3) || !_commandMode) { return false; }
-  char buffer[5];
-  snprintf(buffer, sizeof(buffer), buildSString(PSTR("A"), false), authMode);
+  static char buffer[5];
+  snprintf_P(buffer, sizeof(buffer), PSTR("SA,%d"), authMode);
   serial.println(buffer);
   serial.flush();
   return isAOK();
@@ -154,8 +174,8 @@ bool RN41_42::setAuthenticationMode(uint8_t authMode)
 bool RN41_42::setBreak(uint8_t breakVal)
 {
   if (!(breakVal >= 1 && breakVal <= 6) || !_commandMode) { return false; }
-  char buffer[5];
-  snprintf(buffer, sizeof(buffer), buildSString(PSTR("B"), false), breakVal);
+  static char buffer[5];
+  snprintf_P(buffer, sizeof(buffer), PSTR("SB,%d"), breakVal);
   serial.println(buffer);
   serial.flush();
   return isAOK();
@@ -166,8 +186,8 @@ bool RN41_42::setBreak(uint8_t breakVal)
 bool RN41_42::setServiceClass(uint16_t hex)
 {
   if (!_commandMode) { return false; }
-  char buffer[8];
-  snprintf(buffer, sizeof(buffer), buildHexSString(PSTR("C")), hex);
+  static char buffer[8];
+  snprintf_P(buffer, sizeof(buffer), PSTR("SC,%04X"), hex);
   serial.println(buffer);
   serial.flush();
   return isAOK();
@@ -179,8 +199,8 @@ bool RN41_42::setServiceClass(uint16_t hex)
 bool RN41_42::setDeviceClass(uint16_t hex)
 {
   if (!_commandMode) { return false; }
-  char buffer[8];
-  snprintf(buffer, sizeof(buffer), buildHexSString(PSTR("D")), hex);
+  static char buffer[8];
+  snprintf_P(buffer, sizeof(buffer), PSTR("SD,%04X"), hex);
   serial.println(buffer);
   serial.flush();
   return isAOK();
@@ -191,8 +211,8 @@ bool RN41_42::setDeviceClass(uint16_t hex)
 bool RN41_42::setUUID(char hex[32])
 {
   if (!_commandMode) { return false; }
-  char buffer[35];
-  snprintf(buffer, sizeof(buffer), buildSString(PSTR("E"), true), hex);
+  static char buffer[35];
+  snprintf_P(buffer, sizeof(buffer), PSTR("SE,%s"), hex);
   serial.println(buffer);
   serial.flush();
   return isAOK();
@@ -203,9 +223,7 @@ bool RN41_42::setUUID(char hex[32])
 bool RN41_42::restoreFactoryDefaults()
 {
   if (!_commandMode) { return false; }
-  char buffer[5];
-  snprintf(buffer, sizeof(buffer), buildSString(PSTR("F"), false), 1);
-  serial.println(buffer);
+  serial.println(PSTR("SF,1"));
   serial.flush();
   return isAOK();
 }
@@ -215,8 +233,8 @@ bool RN41_42::restoreFactoryDefaults()
 bool RN41_42::setHIDRegister(uint16_t hex)
 {
   if (!_commandMode) { return false; }
-  char buffer[8];
-  snprintf(buffer, sizeof(buffer), buildHexSString(PSTR("H")), hex);
+  static char buffer[8];
+  snprintf_P(buffer, sizeof(buffer), PSTR("SH,%04X"), hex);
   serial.println(buffer);
   serial.flush();
   return isAOK();
@@ -227,8 +245,8 @@ bool RN41_42::setHIDRegister(uint16_t hex)
 bool RN41_42::setInquiryScanWindow(uint16_t hex)
 {
   if (!_commandMode) { return false; }
-  char buffer[8];
-  snprintf(buffer, sizeof(buffer), buildHexSString(PSTR("I")), hex);
+  static char buffer[8];
+  snprintf_P(buffer, sizeof(buffer), PSTR("SI,%04X"), hex);
   serial.println(buffer);
   serial.flush();
   return isAOK();
@@ -239,8 +257,8 @@ bool RN41_42::setInquiryScanWindow(uint16_t hex)
 bool RN41_42::setPageScanWindow(uint16_t hex)
 {
   if (!_commandMode) { return false; }
-  char buffer[8];
-  snprintf(buffer, sizeof(buffer), buildHexSString(PSTR("J")), hex);
+  static char buffer[8];
+  snprintf_P(buffer, sizeof(buffer), PSTR("SJ,%04X"), hex);
   serial.println(buffer);
   serial.flush();
   return isAOK();
@@ -251,8 +269,8 @@ bool RN41_42::setPageScanWindow(uint16_t hex)
 bool RN41_42::setUARTParity(char parity)
 {
   if (!(parity == 'E' || parity == 'O' || parity == 'N') || !_commandMode) { return false; }
-  char buffer[5];
-  snprintf(buffer, sizeof(buffer), buildSString(PSTR("L"), true), parity);
+  static char buffer[5];
+  snprintf_P(buffer, sizeof(buffer), PSTR("SL,%s"), parity);
   serial.println(buffer);
   serial.flush();
   return isAOK();
@@ -272,8 +290,8 @@ bool RN41_42::setUARTParity(char parity)
 bool RN41_42::setMode(unsigned int mode)
 {
   if (!(mode <= 6) || !_commandMode) { return false; }
-  char buffer[5];
-  snprintf(buffer, sizeof(buffer), buildSString(PSTR("M"), false), mode);
+  static char buffer[5];
+  snprintf_P(buffer, sizeof(buffer), PSTR("SM,%d"), mode);
   serial.println(buffer);
   serial.flush();
   return isAOK();
@@ -285,8 +303,8 @@ bool RN41_42::setMode(unsigned int mode)
 bool RN41_42::setDeviceName(char name[21])
 {
   if (!_commandMode) { return false; }
-  char buffer[24];
-  snprintf(buffer, sizeof(buffer), buildSString(PSTR("N"), true), name);
+  static char buffer[24];
+  snprintf_P(buffer, sizeof(buffer), PSTR("SN,%s"), name);
   serial.println(buffer);
   serial.flush();
   return isAOK();
@@ -298,8 +316,8 @@ bool RN41_42::setDeviceName(char name[21])
 bool RN41_42::setExtendedStatusString(char name[9])
 {
   if (!_commandMode) { return false; }
-  char buffer[12];
-  snprintf(buffer, sizeof(buffer), buildSString(PSTR("O"), true), name);
+  static char buffer[12];
+  snprintf_P(buffer, sizeof(buffer), PSTR("SO,%s"), name);
   serial.println(buffer);
   serial.flush();
   return isAOK();
@@ -310,8 +328,8 @@ bool RN41_42::setExtendedStatusString(char name[9])
 bool RN41_42::setPinCode(char pin[5])
 {
   if (!_commandMode) { return false; }
-  char buffer[8];
-  snprintf(buffer, sizeof(buffer), buildSString(PSTR("P"), true), pin);
+  static char buffer[8];
+  snprintf_P(buffer, sizeof(buffer), PSTR("SP,%s"), pin);
   serial.println(buffer);
   serial.flush();
   return isAOK();
@@ -322,7 +340,7 @@ bool RN41_42::setPinCode(char pin[5])
 bool RN41_42::setMask(uint8_t mask)
 {
   if (!_commandMode) { return false; }
-  char buffer[7];
+  static char buffer[7];
   switch (mask)
   {
   case 0:
@@ -331,7 +349,7 @@ bool RN41_42::setMask(uint8_t mask)
   case 16:
   case 128:
   case 256:
-    snprintf(buffer, sizeof(buffer), buildSString(PSTR("Q"), false), mask);
+    snprintf_P(buffer, sizeof(buffer), PSTR("SQ,%d"), mask);
     serial.println(buffer);
     serial.flush();
     return isAOK();
@@ -345,8 +363,8 @@ bool RN41_42::setMask(uint8_t mask)
 bool RN41_42::setRemoteAddress(char address[13])
 {
   if (!_commandMode) { return false; }
-  char buffer[16];
-  snprintf(buffer, sizeof(buffer), buildSString(PSTR("R"), true), address);
+  static char buffer[16];
+  snprintf_P(buffer, sizeof(buffer), PSTR("SR,%s"), address);
   serial.println(buffer);
   serial.flush();
   return isAOK();
@@ -357,9 +375,7 @@ bool RN41_42::setRemoteAddress(char address[13])
 bool RN41_42::eraseRemoteAddress()
 {
   if (!_commandMode) { return false; }
-  char buffer[5];
-  snprintf(buffer, sizeof(buffer), buildSString(PSTR("R"), true), "Z");
-  serial.println(buffer);
+  serial.println(PSTR("SR,Z"));
   serial.flush();
   return isAOK();
 }
@@ -369,9 +385,7 @@ bool RN41_42::eraseRemoteAddress()
 bool RN41_42::setRemoteAddressLastObserved()
 {
   if (!_commandMode) { return false; }
-  char buffer[5];
-  snprintf(buffer, sizeof(buffer), buildSString(PSTR("R"), true), "I");
-  serial.println(buffer);
+  serial.println(PSTR("SR,I"));
   serial.flush();
   return isAOK();
 }
@@ -381,8 +395,8 @@ bool RN41_42::setRemoteAddressLastObserved()
 bool RN41_42::setServiceName(char name[21])
 {
   if (!_commandMode) { return false; }
-  char buffer[24];
-  snprintf(buffer, sizeof(buffer), buildSString(PSTR("S"), true), name);
+  static char buffer[24];
+  snprintf_P(buffer, sizeof(buffer), PSTR("SS,%s"), name);
   serial.println(buffer);
   serial.flush();
   return isAOK();
@@ -393,8 +407,8 @@ bool RN41_42::setServiceName(char name[21])
 bool RN41_42::setConfigTimer(uint8_t value)
 {
   if (!_commandMode) { return false; }
-  char buffer[7];
-  snprintf(buffer, sizeof(buffer), buildSString(PSTR("T"), false), value);
+  static char buffer[7];
+  snprintf_P(buffer, sizeof(buffer), PSTR("ST,%d"), value);
   serial.println(buffer);
   serial.flush();
   return isAOK();
@@ -405,7 +419,7 @@ bool RN41_42::setConfigTimer(uint8_t value)
 bool RN41_42::setUARTBaud(uint8_t baud)
 {
   if (!_commandMode) { return false; }
-  char buffer[6];
+  static char buffer[6];
   switch (baud) {
   case 12:
   case 24:
@@ -419,7 +433,7 @@ bool RN41_42::setUARTBaud(uint8_t baud)
   case 23:
   case 46:
   case 92:
-    snprintf(buffer, sizeof(buffer), buildSString(PSTR("U"), false), baud);
+    snprintf_P(buffer, sizeof(buffer), PSTR("SU,%d"), baud);
     serial.println(buffer);
     serial.flush();
     return isAOK();
@@ -433,8 +447,8 @@ bool RN41_42::setUARTBaud(uint8_t baud)
 bool RN41_42::setSniff(uint16_t hex)
 {
   if (!_commandMode) { return false; }
-  char buffer[8];
-  snprintf(buffer, sizeof(buffer), buildHexSString(PSTR("W")), hex);
+  static char buffer[8];
+  snprintf_P(buffer, sizeof(buffer), PSTR("SW,%04X"), hex);
   serial.println(buffer);
   serial.flush();
   return isAOK();
@@ -445,8 +459,8 @@ bool RN41_42::setSniff(uint16_t hex)
 bool RN41_42::setBonding(bool en)
 {
   if (!_commandMode) { return false; }
-  char buffer[5];
-  snprintf(buffer, sizeof(buffer), buildSString(PSTR("X"), false), (int)en);
+  static char buffer[5];
+  snprintf_P(buffer, sizeof(buffer), PSTR("SX,%d"), en);
   serial.println(buffer);
   serial.flush();
   return isAOK();
@@ -457,8 +471,8 @@ bool RN41_42::setBonding(bool en)
 bool RN41_42::setTransmitPower(uint16_t hex)
 {
   if (!_commandMode) { return false; }
-  char buffer[8];
-  snprintf(buffer, sizeof(buffer), buildHexSString(PSTR("Y")), hex);
+  static char buffer[8];
+  snprintf_P(buffer, sizeof(buffer), PSTR("SY,%04X"), hex);
   serial.println(buffer);
   serial.flush();
   return isAOK();
@@ -469,8 +483,8 @@ bool RN41_42::setTransmitPower(uint16_t hex)
 bool RN41_42::setNonStandardBaud(uint8_t multi)
 {
   if (!_commandMode) { return false; }
-  char buffer[6];
-  snprintf(buffer, sizeof(buffer), buildSString(PSTR("Z"), false), multi);
+  static char buffer[6];
+  snprintf_P(buffer, sizeof(buffer), PSTR("SZ,%d"), multi);
   serial.println(buffer);
   serial.flush();
   return isAOK();
@@ -480,9 +494,9 @@ bool RN41_42::setNonStandardBaud(uint8_t multi)
 //S~,<value>
 bool RN41_42::setProfile(uint8_t value) {
   if (!(value >= 0 && value <= 6) || !_commandMode) { return false; }
-  char buffer[5];
+  static char buffer[5];
   enterCommandMode();
-  snprintf(buffer, sizeof(buffer), buildSString(PSTR("~"), false), value);
+  snprintf_P(buffer, sizeof(buffer), PSTR("S~,%d"), value);
   serial.println(buffer);
   serial.flush();
   return isAOK();
@@ -493,8 +507,8 @@ bool RN41_42::setProfile(uint8_t value) {
 bool RN41_42::setSerializedFriendlyName(char name[16])
 {
   if (!_commandMode) { return false; }
-  char buffer[19];
-  snprintf(buffer, sizeof(buffer), buildSString(PSTR("-"), true), name);
+  static char buffer[19];
+  snprintf_P(buffer, sizeof(buffer), PSTR("S-,%s"), name);
   serial.println(buffer);
   serial.flush();
   return isAOK();
@@ -505,8 +519,8 @@ bool RN41_42::setSerializedFriendlyName(char name[16])
 bool RN41_42::setRoleSwitch(bool en)
 {
   if (!_commandMode) { return false; }
-  char buffer[5];
-  snprintf(buffer, sizeof(buffer), buildSString(PSTR("?"), false), en);
+  static char buffer[5];
+  snprintf_P(buffer, sizeof(buffer), PSTR("S?,%d"), en);
   serial.println(buffer);
   serial.flush();
   return isAOK();
@@ -517,12 +531,11 @@ bool RN41_42::setRoleSwitch(bool en)
 bool RN41_42::setConfigChar(char c)
 {
   if (!_commandMode) { return false; }
-  char buffer[5];
-  snprintf(buffer, sizeof(buffer), buildSString(PSTR("$"), true), c);
+  static char buffer[5];
+  snprintf(buffer, sizeof(buffer), PSTR("S$,%s"), c);
   serial.println(buffer);
   serial.flush();
-  if (isAOK()) { _configChar[0] = c; return true; }
-  return false;
+  return isAOK();;
 }
 
 //Set Low-Power Connect Mode
@@ -530,8 +543,8 @@ bool RN41_42::setConfigChar(char c)
 bool RN41_42::setLPConnectMode(uint8_t hex)
 {
   if (!_commandMode) { return false; }
-  char buffer[8];
-  snprintf(buffer, sizeof(buffer), buildHexSString(PSTR("|")), hex);
+  static char buffer[8];
+  snprintf(buffer, sizeof(buffer), PSTR("S|,%04X"), hex);
   serial.println(buffer);
   serial.flush();
   return isAOK();
@@ -627,27 +640,27 @@ bool RN41_42::connectToStoredAddress()
   if (!_commandMode) { return false; }
   serial.println(F("C"));
   serial.flush();
-  return strncmp_P(getString(), connected, sizeof(connected)) == 0 ? true : false;
+  return  true;
 }
 
 bool RN41_42::connectToAddress(char address[13])
 {
   if (!_commandMode) { return false; }
-  char buffer[15];
+  static char buffer[15];
   snprintf_P(buffer, sizeof(buffer), PSTR("C,%S"), address);
   serial.println(buffer);
   serial.flush();
-  return strncmp_P(getString(), connected, sizeof(connected)) == 0 ? true : false;
+  return true;
 }
 
 bool RN41_42::connectToAddressFast(char address[13])
 {
   if (!_commandMode) { return false; }
-  char buffer[16];
+  static char buffer[16];
   snprintf_P(buffer, sizeof(buffer), PSTR("CF,%S"), address);
   serial.println(buffer);
   serial.flush();
-  return strncmp_P(getString(), connected, sizeof(connected)) == 0 ? true : false;
+  return true;
 }
 
 bool RN41_42::connectToLastFoundAddressFast()
@@ -655,7 +668,7 @@ bool RN41_42::connectToLastFoundAddressFast()
   if (!_commandMode) { return false; }
   serial.println(F("CFI"));
   serial.flush();
-  return strncmp_P(getString(), connected, sizeof(connected)) == 0 ? true : false;
+  return true;
 }
 
 bool RN41_42::connectToStoredRemoteAddressFast()
@@ -663,17 +676,17 @@ bool RN41_42::connectToStoredRemoteAddressFast()
   if (!_commandMode) { return false; }
   serial.println(F("CFR"));
   serial.flush();
-  return strncmp_P(getString(), connected, sizeof(connected)) == 0 ? true : false;
+  return true;
 }
 
 bool RN41_42::connectToAddressTimed(char address[13], uint8_t time)
 {
   if (!_commandMode) { return false; }
-  char buffer[19];
+  static char buffer[19];
   snprintf_P(buffer, sizeof(buffer), PSTR("CT,%S,$d"), address, time);
   serial.println(buffer);
   serial.flush();
-  return strncmp_P(getString(), connected, sizeof(connected)) == 0 ? true : false;
+  return true;
 }
 
 bool RN41_42::fastDataMode()
@@ -696,7 +709,7 @@ char * RN41_42::help()
 char * RN41_42::performInquiryScan(uint8_t time)
 {
   if (!(time <= 48) || !_commandMode) { return false; }
-  char buffer[5];
+  static char buffer[5];
   snprintf_P(buffer, sizeof(buffer), PSTR("I,$d"), time);
   serial.println(buffer);
   serial.flush();
@@ -706,7 +719,7 @@ char * RN41_42::performInquiryScan(uint8_t time)
 char * RN41_42::performInquiryScan(uint8_t time, uint32_t cod)
 {
   if (!(time <= 48) || !_commandMode) { return false; }
-  char buffer[11];
+  static char buffer[11];
   snprintf_P(buffer, sizeof(buffer), PSTR("I,$d,%06X"), time, cod);
   serial.println(buffer);
   serial.flush();
@@ -716,7 +729,7 @@ char * RN41_42::performInquiryScan(uint8_t time, uint32_t cod)
 char * RN41_42::performInquiryScanNN(uint8_t time)
 {
   if (!(time <= 48) || !_commandMode) { return false; }
-  char buffer[5];
+  static char buffer[5];
   snprintf_P(buffer, sizeof(buffer), PSTR("IN$d"), time);
   serial.println(buffer);
   serial.flush();
@@ -726,7 +739,7 @@ char * RN41_42::performInquiryScanNN(uint8_t time)
 char * RN41_42::performInquiryScanNN(uint8_t time, uint32_t cod)
 {
   if (!(time <= 48) || !_commandMode) { return false; }
-  char buffer[11];
+  static char buffer[11];
   snprintf_P(buffer, sizeof(buffer), PSTR("IN$d,%06X"), time, cod);
   serial.println(buffer);
   serial.flush();
@@ -744,7 +757,7 @@ char * RN41_42::scanRSSI()
 char * RN41_42::performRovingInquiryScan(uint8_t time)
 {
   if (!_commandMode) { return false; }
-  char buffer[5];
+  static char buffer[5];
   snprintf_P(buffer, sizeof(buffer), PSTR("IS$d"), time);
   serial.println(buffer);
   serial.flush();
@@ -754,7 +767,7 @@ char * RN41_42::performRovingInquiryScan(uint8_t time)
 char * RN41_42::performCableReplaceInquiryScan(uint8_t time)
 {
   if (!_commandMode) { return false; }
-  char buffer[5];
+  static char buffer[5];
   snprintf_P(buffer, sizeof(buffer), PSTR("IR$d"), time);
   serial.println(buffer);
   serial.flush();
@@ -803,7 +816,7 @@ char * RN41_42::otherSettings()
 
 void RN41_42::passMessage(char mes[32])
 {
-  char buffer[34];
+  static char buffer[34];
   strncpy_P(buffer, PSTR("P,"), 3);
   strncat(buffer, mes, sizeof(buffer));
   serial.println(buffer);
@@ -821,7 +834,7 @@ bool RN41_42::quietMode()
 bool RN41_42::quietMode(uint8_t mode)
 {
   if (!(mode >= 0 && mode <= 2) || !_commandMode) { return false; }
-  char buffer[4];
+  static char buffer[4];
   snprintf_P(buffer, sizeof(buffer), PSTR("Q,$d"), mode);
   serial.println(buffer);
   serial.flush();
@@ -860,7 +873,7 @@ bool RN41_42::reset()
 bool RN41_42::passThrough(bool en)
 {
   if (!_commandMode) { return false; }
-  char buffer[4];
+  static char buffer[4];
   snprintf_P(buffer, sizeof(buffer), PSTR("T,$d"), en);
   serial.println(buffer);
   serial.flush();
@@ -870,7 +883,7 @@ bool RN41_42::passThrough(bool en)
 bool RN41_42::uartChangeTemp(char baud[5], char parity)
 {
   if (!_commandMode) { return false; }
-  char buffer[9];
+  static char buffer[9];
   snprintf_P(buffer, sizeof(buffer), PSTR("U,%S,%S"), baud, parity);
   serial.println(buffer);
   serial.flush();
@@ -900,6 +913,7 @@ bool RN41_42::enableDiscoveryConnection()
 //Z
 void RN41_42::sleep()
 {
+  if (!_commandMode) { return; }
   serial.println(F("Z"));
   serial.flush();
   _commandMode = false;
@@ -911,10 +925,11 @@ void RN41_42::sleep()
 //S@
 bool RN41_42::pinMode(uint8_t pin, uint8_t dir)
 {
+
   if (!(pin >= 0 && pin <= 7) || !(dir == 0 || dir == 1) || !_commandMode) { return false; }
   bitSet(gpioSetDir, pin);
   bitWrite(gpioDir, pin, dir);
-  char buffer[8];
+  static char buffer[8];
   snprintf_P(buffer, sizeof(buffer), PSTR("S@,%02X%02X"), gpioSetDir, gpioDir);
   serial.println(buffer);
   serial.flush();
@@ -925,8 +940,9 @@ bool RN41_42::pinMode(uint8_t pin, uint8_t dir)
 //S& or S*
 bool RN41_42::digitalWrite(uint8_t pin, uint8_t val)
 {
+
   if (!(pin >= 0 && pin <= 11) || !(val == 0 || val == 1) || !_commandMode) { return false; }
-  char buffer[8];
+  static char buffer[8];
   if (pin <= 7)
   {
     bitSet(gpioSetVal, pin);
@@ -951,7 +967,7 @@ bool RN41_42::pinModePowerUp(uint8_t pin, uint8_t dir)
   if (!(pin >= 0 && pin <= 7) || !(dir == 0 || dir == 1) || !_commandMode) { return false; }
   bitSet(gpioSetDirPowerUp, pin);
   bitWrite(gpioDirPowerUp, pin, dir);
-  char buffer[8];
+  static char buffer[8];
   snprintf_P(buffer, sizeof(buffer), PSTR("S%,%02X%02X"), gpioSetDirPowerUp, gpioDirPowerUp);
   serial.println(buffer);
   serial.flush();
@@ -965,7 +981,7 @@ bool RN41_42::digitalWritePowerUp(uint8_t pin, uint8_t val)
   if (!(pin >= 0 && pin <= 7) || !(val == 0 || val == 1) || !_commandMode) { return false; }
   bitSet(gpioSetValPowerUp, pin);
   bitWrite(gpioValPowerUp, pin, val);
-  char buffer[8];
+  static char buffer[8];
   snprintf_P(buffer, sizeof(buffer), PSTR("S^,%02X%02X"), gpioSetValPowerUp, gpioValPowerUp);
   serial.println(buffer);
   serial.flush();
@@ -984,6 +1000,7 @@ char *RN41_42::getString()
     i++;
   }
   recvBuf[i] = { '\0' };
+  //Serial.print(recvBuf);
   return recvBuf;
 }
 
@@ -996,7 +1013,7 @@ void RN41_42::setupIO()
 
 #ifdef RN41_42_GPIO2
   ::pinMode(RN41_42_GPIO2, INPUT);
-  ::digitalWrite(RN41_42_GPIO2, HIGH);
+  //::digitalWrite(RN41_42_GPIO2, HIGH);
 #endif // RN41_42_CONN_PIN
 
 #ifdef RN41_42_GPIO4
@@ -1020,31 +1037,15 @@ void RN41_42::setupIO()
 #endif // RN41_42_GPIO
 }
 
-char * RN41_42::buildHexSString(const PROGMEM char* cmd)
-{
-  strncpy_P(sBuf, S, 2);
-  strncat_P(sBuf, cmd, 2);
-  strncat_P(sBuf, pgmHex, 4);
-  return sBuf;
-}
-
-char *RN41_42::buildSString(const PROGMEM char* cmd, bool isString)
-{
-  strncpy_P(sBuf, S, 2);
-  strncat_P(sBuf, cmd, 2);
-  strncat_P(sBuf, commaPercent, 3);
-  if (isString) {
-    strncat_P(sBuf, str, 2);
-  }
-  else
-  {
-    strncat_P(sBuf, dec, 2);
-  }
-  return sBuf;
-}
-
 bool RN41_42::isAOK()
 {
   return strncmp_P(getString(), PSTR("AOK\r\n"), 6) == 0 ? true : false;
 }
 
+#ifdef RN41_42_RESET
+void RN41_42::wakeup()
+{
+    reset();
+    delay(500);
+}
+#endif
