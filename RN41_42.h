@@ -18,6 +18,8 @@
 //#define RN41_42_GPIO6           //Auto-Connect
 //#define RN41_42_GPIO7           //Baud Rate
 
+#define revBufSize 32
+
 #if defined(ARDUINO) && ARDUINO >= 100
 #include "arduino.h"
 #else
@@ -27,7 +29,7 @@
 class RN41_42{
 
 public:
-  char recvBuf[32];
+  static char recvBuf[revBufSize];
   RN41_42(HardwareSerial& _serial);
   RN41_42(HardwareSerial& _serial, char configChar);
   void begin(unsigned long baudrate);
@@ -146,8 +148,7 @@ private:
   HardwareSerial& serial;
   bool _commandMode;
   unsigned long _baud;
-  char _configChar[2];
-  char sBuf[10];
+  char _configChar;
 
   //GPIO Bitmasks
   uint8_t gpioSetDir = 0U;
@@ -164,7 +165,7 @@ private:
   void setupIO();
 
   //Recieve Data
-  char *getString();
+  char *getSingleLineResponse();
 
   //Response Check
   bool isAOK();
