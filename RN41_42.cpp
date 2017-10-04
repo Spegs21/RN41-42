@@ -347,9 +347,9 @@ bool RN41_42::setConfigTimer(uint8_t value)
 bool RN41_42::setUARTBaud(uint8_t baud)
 {
   char buffer[6];
-    snprintf_P(buffer, sizeof(buffer), PSTR("SU,%d"), baud);
-    serial.println(buffer);
-    return isAOK();
+  snprintf_P(buffer, sizeof(buffer), PSTR("SU,%d"), baud);
+  serial.println(buffer);
+  return isAOK();
 }
 
 //Set Sniff Mode
@@ -485,7 +485,7 @@ bool RN41_42::getConnectionStatus()
   return digitalRead(RN41_42_GPIO2);
 #else
   serial.println(F("GK"));
-  return strncmp_P(getString(), PSTR("1\r\n"), 8) == 0 ? true : false;
+  return strncmp_P(getSingleLineResponse(), PSTR("1\r\n"), 8) == 0 ? true : false;
 #endif // RN41_42_CONN_PIN
 }
 
@@ -514,7 +514,9 @@ char * RN41_42::displayDipwitchValues()
 bool RN41_42::connectToStoredAddress()
 {
   serial.println(F("C"));
-  return strncmp_P(getSingleLineResponse(), connected, sizeof(connected)) == 0 ? true : false;
+  if (strncmp_P(getSingleLineResponse(), PSTR("TRYING\r\n"), 9) == 0) {
+
+  }
 }
 
 bool RN41_42::connectToAddress(char address[13])
@@ -694,7 +696,7 @@ bool RN41_42::reset()
   if (!_commandMode) { return false; }
   serial.println(F("R,1"));
   serial.flush();
-  if (strcmp_P(getString(), PSTR("Reboot!\r\n")) == 0) { _commandMode = false; return true; }
+  if (strcmp_P(getSingleLineResponse(), PSTR("Reboot!\r\n")) == 0) { _commandMode = false; return true; }
   return false;
 
 #endif // RN41_42_RESET_PIN
@@ -804,7 +806,7 @@ char *RN41_42::getSingleLineResponse()
   //Clear the buffer
   memset(&recvBuf[0], 0, revBufSize);
   byte index = 0;
-  while (serial.available() > 0)
+  while (waitForCompleteResponse ? serial.available() > 0 || recvBuf[index - 1] != '\n' : serial.available())
   {
     recvBuf[index] = serial.read();
     index++;

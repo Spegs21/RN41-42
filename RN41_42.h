@@ -19,6 +19,7 @@
 //#define RN41_42_GPIO7           //Baud Rate
 
 #define revBufSize 32
+#define waitForCompleteResponse 1
 
 #if defined(ARDUINO) && ARDUINO >= 100
 #include "arduino.h"
