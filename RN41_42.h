@@ -40,6 +40,7 @@ public:
   char *recieveMessage();
   int available();
   char read();
+  void flush();
 
 #ifdef RN41_42_RESET
   void wakeup();

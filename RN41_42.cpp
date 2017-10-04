@@ -47,11 +47,17 @@ char RN41_42::read()
 {
     return serial.read();
 }
+
+void RN41_42::flush()
+{
+    return serial.flush();
+}
+
 //Enter Command Mode
 bool RN41_42::enterCommandMode()
 {
   if (_commandMode) { return true; }
-  for (int i = 0; i < 3; i++) { serial.print(_configChar); }
+  for (int i = 0; i < 3; i++) { serial.print(_configChar);}
   if (strncmp_P(getString(), PSTR("CMD\r\n"), 6) == 0) { _commandMode = true; return true; }
   return false;
 }
@@ -67,7 +73,7 @@ bool RN41_42::exitCommandMode()
 
 void RN41_42::sendMessage(char message[32])
 {
-  serial.println(message);
+  serial.print(message);
 }
 
 void RN41_42::sendChar(char c)
@@ -312,7 +318,7 @@ bool RN41_42::setRemoteAddress(char address[13])
 //SR,Z
 bool RN41_42::eraseRemoteAddress()
 {
-  serial.println(PSTR("SR,Z"));
+  serial.println(F("SR,Z"));
   return isAOK();
 }
 
@@ -320,7 +326,7 @@ bool RN41_42::eraseRemoteAddress()
 //SR,I
 bool RN41_42::setRemoteAddressLastObserved()
 {
-  serial.println(PSTR("SR,I"));
+  serial.println(F("SR,I"));
   return isAOK();
 }
 
@@ -516,7 +522,7 @@ char * RN41_42::displayDipwitchValues()
 bool RN41_42::connectToStoredAddress()
 {
   serial.println(F("C"));
-  return strncmp_P(getString(), connected, sizeof(connected)) == 0 ? true : false;
+  return true;// strncmp_P(getString(), PSTR("TRYING\r\n"), 9) == 0 ? true : false;
 }
 
 bool RN41_42::connectToAddress(char address[13])
@@ -689,7 +695,7 @@ bool RN41_42::reset()
 {
 #ifdef RN41_42_RESET
   ::digitalWrite(RN41_42_RESET, LOW);
-  delay(100);
+  delay(50);
   ::digitalWrite(RN41_42_RESET, HIGH);
   return true;
 #else
@@ -811,7 +817,7 @@ char *RN41_42::getString()
     i++;
   }
   recvBuf[i] = { '\0' };
-  //Serial.print(recvBuf);
+  Serial.print(recvBuf);
   return recvBuf;
 }
 
