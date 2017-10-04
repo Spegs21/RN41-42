@@ -18,8 +18,8 @@
 //#define RN41_42_GPIO6           //Auto-Connect
 //#define RN41_42_GPIO7           //Baud Rate
 
-#define revBufSize 32
-#define waitForCompleteResponse 1
+#define revBufSize 16
+#define DEBUG
 
 #if defined(ARDUINO) && ARDUINO >= 100
 #include "arduino.h"
@@ -43,7 +43,6 @@ public:
   char *recieveMessage();
   int available();
   char read();
-  void flush();
 
 #ifdef RN41_42_RESET
   void wakeup();
@@ -164,17 +163,13 @@ private:
   uint8_t gpioValPowerUp = 0U;
 
   //Private Commands
-  void setupIO();
-
-  //Recieve Data
+  void setupIO();;
   char *getSingleLineResponse();
-
-  //Response Check
   bool isAOK();
 
   //Constants
-  const PROGMEM char connected[12] = { 'C','o','n','n','e','c','t','e','d','\r','\n','\0' };
-  const PROGMEM char quiet[8] = { 'Q','u','i','e','t','\r','\n','\0' };
+  const PROGMEM char connected[10] = { 'C','o','n','n','e','c','t','e','d','\0' };
+  const PROGMEM char quiet[6] = { 'Q','u','i','e','t','\0' };
 };
 
 #endif

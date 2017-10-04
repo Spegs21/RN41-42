@@ -50,7 +50,7 @@ bool RN41_42::enterCommandMode()
 {
   if (_commandMode) { return true; }
   for (int i = 0; i < 3; i++) { serial.print(_configChar); }
-  if (strncmp_P(getSingleLineResponse(), PSTR("CMD\r\n"), 6) == 0) { _commandMode = true; return true; }
+  if (strncmp_P(getSingleLineResponse(), PSTR("CMD"), 6) == 0) { _commandMode = true; return true; }
   return false;
 }
 
@@ -59,7 +59,7 @@ bool RN41_42::exitCommandMode()
 {
   if (!_commandMode) { return true; }
   serial.println(F("---"));
-  if (strncmp_P(getSingleLineResponse(), PSTR("END\r\n"), 6) == 0) { _commandMode = false; return true; }
+  if (strncmp_P(getSingleLineResponse(), PSTR("END"), 6) == 0) { _commandMode = false; return true; }
   return false;
 }
 
@@ -485,7 +485,7 @@ bool RN41_42::getConnectionStatus()
   return digitalRead(RN41_42_GPIO2);
 #else
   serial.println(F("GK"));
-  return strncmp_P(getSingleLineResponse(), PSTR("1\r\n"), 8) == 0 ? true : false;
+  return strncmp_P(getSingleLineResponse(), PSTR("1"), 8) == 0 ? true : false;
 #endif // RN41_42_CONN_PIN
 }
 
@@ -514,7 +514,7 @@ char * RN41_42::displayDipwitchValues()
 bool RN41_42::connectToStoredAddress()
 {
   serial.println(F("C"));
-  if (strncmp_P(getSingleLineResponse(), PSTR("TRYING\r\n"), 9) == 0) {
+  if (strncmp_P(getSingleLineResponse(), PSTR("TRYING"), 9) == 0) {
 
   }
 }
@@ -632,7 +632,7 @@ bool RN41_42::hidePIN()
 bool RN41_42::killConnection()
 {
   serial.println(F("K,"));
-  return strncmp_P(getSingleLineResponse(), PSTR("KILL\r\n"), 7) == 0 ? true : false;
+  return strncmp_P(getSingleLineResponse(), PSTR("KILL"), 7) == 0 ? true : false;
 }
 
 char * RN41_42::linkQuality()
@@ -696,7 +696,7 @@ bool RN41_42::reset()
   if (!_commandMode) { return false; }
   serial.println(F("R,1"));
   serial.flush();
-  if (strcmp_P(getSingleLineResponse(), PSTR("Reboot!\r\n")) == 0) { _commandMode = false; return true; }
+  if (strcmp_P(getSingleLineResponse(), PSTR("Reboot!")) == 0) { _commandMode = false; return true; }
   return false;
 
 #endif // RN41_42_RESET_PIN
@@ -806,32 +806,27 @@ char *RN41_42::getSingleLineResponse()
   //Clear the buffer
   memset(&recvBuf[0], 0, revBufSize);
   byte index = 0;
-  while (waitForCompleteResponse ? serial.available() > 0 || recvBuf[index - 1] != '\n' : serial.available())
+  //Wait for the response
+  while (!serial.available()) {}
+  while (serial.available())
   {
     recvBuf[index] = serial.read();
-    index++;
-    if (recvBuf[index - 1] != '\n') {
+    if (recvBuf[index] != '\n') {
       //Check for overflow
+      index++;
       if (index >= revBufSize) {
         index = revBufSize - 1;
       }
     }
     else {
-      //Check for room for \0
-      if (index < revBufSize - 1) {
-        break;
-      }
-      //Move the \r\n back to make room for \0
-      else {
-        recvBuf[revBufSize - 3] = recvBuf[revBufSize - 2];
-        recvBuf[revBufSize - 2] = recvBuf[revBufSize - 1];
-        break;
-      }
+      //Check for \r to overwrite
+      if (recvBuf[index - 1] == '\r') index--;
+      break;
     }
   }
   recvBuf[index] = '\0';
 #ifdef DEBUG
-  Serial.print(recvBuf);
+  Serial.println(recvBuf);
 #endif
   return recvBuf;
 }
@@ -871,7 +866,7 @@ void RN41_42::setupIO()
 
 bool RN41_42::isAOK()
 {
-  return strncmp_P(getSingleLineResponse(), PSTR("AOK\r\n"), 6) == 0 ? true : false;
+  return strncmp_P(getSingleLineResponse(), PSTR("AOK"), 6) == 0 ? true : false;
 }
 
 #ifdef RN41_42_RESET
