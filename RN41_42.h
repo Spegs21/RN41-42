@@ -41,12 +41,8 @@ public:
   void sendMessage(char message[32]);
   void sendChar(char c);
   char *recieveMessage();
-  int available();
+  uint8_t available();
   char read();
-
-#ifdef RN41_42_RESET
-  void wakeup();
-#endif
 
   //Dipswitch/GPIO Functions
 #ifdef RN41_42_GPIO4
@@ -145,11 +141,23 @@ public:
 
 private:
 
+  struct responses {
+    const PROGMEM char* cmd;
+    const PROGMEM char* end;
+    const PROGMEM char* trying;
+    const PROGMEM char* reboot;
+    const PROGMEM char* kill;
+    const PROGMEM char* connected;
+    const PROGMEM char* quiet;
+    const PROGMEM char* aok;
+  };
+
   //Vaiables
   HardwareSerial& serial;
   bool _commandMode;
   unsigned long _baud;
   char _configChar;
+  responses res;
 
   //GPIO Bitmasks
   uint8_t gpioSetDir = 0U;
@@ -163,13 +171,11 @@ private:
   uint8_t gpioValPowerUp = 0U;
 
   //Private Commands
-  void setupIO();;
+  void setupIO();
+  void setupResponses();
   char *getSingleLineResponse();
   bool isAOK();
 
-  //Constants
-  const PROGMEM char connected[10] = { 'C','o','n','n','e','c','t','e','d','\0' };
-  const PROGMEM char quiet[6] = { 'Q','u','i','e','t','\0' };
 };
 
 #endif
