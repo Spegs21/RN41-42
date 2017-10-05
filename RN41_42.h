@@ -18,7 +18,8 @@
 //#define RN41_42_GPIO6           //Auto-Connect
 //#define RN41_42_GPIO7           //Baud Rate
 
-#define revBufSize 32
+#define DEBUG
+#define revBufSize 16
 #define waitForCompleteResponse 1
 
 #if defined(ARDUINO) && ARDUINO >= 100
@@ -30,7 +31,7 @@
 class RN41_42{
 
 public:
-  static char recvBuf[revBufSize];
+  char recvBuf[revBufSize];
   RN41_42(HardwareSerial& _serial);
   RN41_42(HardwareSerial& _serial, char configChar);
   void begin(unsigned long baudrate);
@@ -43,7 +44,6 @@ public:
   char *recieveMessage();
   int available();
   char read();
-  void flush();
 
 #ifdef RN41_42_RESET
   void wakeup();
