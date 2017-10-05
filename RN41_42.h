@@ -18,9 +18,8 @@
 //#define RN41_42_GPIO6           //Auto-Connect
 //#define RN41_42_GPIO7           //Baud Rate
 
-#define DEBUG
 #define revBufSize 16
-#define waitForCompleteResponse 1
+#define DEBUG
 
 #if defined(ARDUINO) && ARDUINO >= 100
 #include "arduino.h"
@@ -42,12 +41,8 @@ public:
   void sendMessage(char message[32]);
   void sendChar(char c);
   char *recieveMessage();
-  int available();
+  uint8_t available();
   char read();
-
-#ifdef RN41_42_RESET
-  void wakeup();
-#endif
 
   //Dipswitch/GPIO Functions
 #ifdef RN41_42_GPIO4
@@ -75,7 +70,7 @@ public:
   bool setInquiryScanWindow(uint16_t hex);		//SI
   bool setPageScanWindow(uint16_t hex);			//SJ
   bool setUARTParity(char parity);				//SL
-  bool setMode(unsigned int mode);				//SM
+  bool setMode(uint8_t mode);				    //SM
   bool setDeviceName(char name[21]);			//SN
   bool setExtendedStatusString(char name[9]);	//SO
   bool setPinCode(char pin[5]);					//SP
@@ -146,11 +141,23 @@ public:
 
 private:
 
+  struct responses {
+    const PROGMEM char* cmd;
+    const PROGMEM char* end;
+    const PROGMEM char* trying;
+    const PROGMEM char* reboot;
+    const PROGMEM char* kill;
+    const PROGMEM char* connected;
+    const PROGMEM char* quiet;
+    const PROGMEM char* aok;
+  };
+
   //Vaiables
   HardwareSerial& serial;
   bool _commandMode;
   unsigned long _baud;
   char _configChar;
+  responses res;
 
   //GPIO Bitmasks
   uint8_t gpioSetDir = 0U;
@@ -165,16 +172,10 @@ private:
 
   //Private Commands
   void setupIO();
-
-  //Recieve Data
+  void setupResponses();
   char *getSingleLineResponse();
-
-  //Response Check
   bool isAOK();
 
-  //Constants
-  const PROGMEM char connected[12] = { 'C','o','n','n','e','c','t','e','d','\r','\n','\0' };
-  const PROGMEM char quiet[8] = { 'Q','u','i','e','t','\r','\n','\0' };
 };
 
 #endif
