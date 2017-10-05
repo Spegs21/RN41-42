@@ -30,7 +30,7 @@
 class RN41_42{
 
 public:
-  static char recvBuf[revBufSize];
+  char recvBuf[revBufSize];
   RN41_42(HardwareSerial& _serial);
   RN41_42(HardwareSerial& _serial, char configChar);
   void begin(unsigned long baudrate);
@@ -70,7 +70,7 @@ public:
   bool setInquiryScanWindow(uint16_t hex);		//SI
   bool setPageScanWindow(uint16_t hex);			//SJ
   bool setUARTParity(char parity);				//SL
-  bool setMode(unsigned int mode);				//SM
+  bool setMode(uint8_t mode);				    //SM
   bool setDeviceName(char name[21]);			//SN
   bool setExtendedStatusString(char name[9]);	//SO
   bool setPinCode(char pin[5]);					//SP
