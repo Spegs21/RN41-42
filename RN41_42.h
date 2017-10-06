@@ -111,9 +111,9 @@ public:
   bool fastDataMode();									    	//F,1
   char *help();													//H
   char *performInquiryScan(uint8_t time);						//I,<value 1>
-  char *performInquiryScan(uint8_t time, uint32_t cod);			//I,<value 1>,<value 2>
+  char *performInquiryScan(uint8_t time, char cod[7]);			//I,<value 1>,<value 2>
   char *performInquiryScanNN(uint8_t time);						//IN,<value 1>
-  char *performInquiryScanNN(uint8_t time, uint32_t cod);		//IN,<value 1>,<value 2>
+  char *performInquiryScanNN(uint8_t time, char cod[7]);		//IN,<value 1>,<value 2>
   char *scanRSSI();												//IQ
   char *performRovingInquiryScan(uint8_t time);					//IS
   char *performCableReplaceInquiryScan(uint8_t time);			//IR
@@ -145,7 +145,7 @@ private:
   HardwareSerial& serial;
   bool _commandMode;
   unsigned long _baud;
-  char _configChar;
+  char _configChar[2];
 
   //GPIO Bitmasks
   uint8_t gpioSetDir = 0U;

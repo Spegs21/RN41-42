@@ -9,13 +9,15 @@
 
 RN41_42::RN41_42(HardwareSerial& _serial) : serial(_serial) {
   _commandMode = false;
-  _configChar = '$';
+  _configChar[0] = '$';
+  _configChar[1] = '\0';
   setupIO();
 }
 
 RN41_42::RN41_42(HardwareSerial& _serial, char configChar) : serial(_serial) {
   _commandMode = false;
-  _configChar = configChar;
+  _configChar[0] = configChar;
+  _configChar[1] = '\0';
   setupIO();
 }
 
@@ -49,7 +51,7 @@ char RN41_42::read()
 bool RN41_42::enterCommandMode()
 {
   if (_commandMode) { return true; }
-  for (int i = 0; i < 3; i++) { serial.print(_configChar); }
+  for (int i = 0; i < 3; i++) { serial.print(_configChar); delay(25); }
   if (strncmp_P(getSingleLineResponse(), PSTR("CMD"), 4) == 0) { _commandMode = true; return true; }
   return false;
 }
@@ -571,7 +573,7 @@ bool RN41_42::connectToStoredAddress()
 {
   serial.println(F("C"));
   if (strncmp_P(getSingleLineResponse(), PSTR("Trying"), 7) == 0) {
-
+      return true;
   }
 }
 
@@ -642,7 +644,7 @@ char * RN41_42::performInquiryScan(uint8_t time)
   return getSingleLineResponse();
 }
 
-char * RN41_42::performInquiryScan(uint8_t time, uint32_t cod)
+char * RN41_42::performInquiryScan(uint8_t time, char cod[7])
 {
   //char buffer[11];
   //snprintf_P(buffer, sizeof(buffer), PSTR("I,%d,%06X"), time, cod);
@@ -650,7 +652,7 @@ char * RN41_42::performInquiryScan(uint8_t time, uint32_t cod)
   serial.print(F("I,"));
   serial.print(time);
   serial.print(F(","));
-  serial.println(cod,HEX);
+  serial.println(cod);
   return getSingleLineResponse();
 }
 
@@ -664,7 +666,7 @@ char * RN41_42::performInquiryScanNN(uint8_t time)
   return getSingleLineResponse();
 }
 
-char * RN41_42::performInquiryScanNN(uint8_t time, uint32_t cod)
+char * RN41_42::performInquiryScanNN(uint8_t time, char cod[7])
 {
   //char buffer[12];
   //snprintf_P(buffer, sizeof(buffer), PSTR("IN%d,%06X"), time, cod);
@@ -672,7 +674,7 @@ char * RN41_42::performInquiryScanNN(uint8_t time, uint32_t cod)
   serial.print(F("IN"));
   serial.print(time);
   serial.print(F(","));
-  serial.println(cod, HEX);
+  serial.println(cod);
   return getSingleLineResponse();
 }
 
@@ -912,11 +914,16 @@ char *RN41_42::getSingleLineResponse()
 {
   //Make sure all characters were sent
   serial.flush();
+  delay(100);
   //Clear the buffer
   memset(&recvBuf[0], 0, revBufSize);
   byte index = 0;
   //Wait for the response
-  while (!serial.available()) {}
+  Serial.println("WFS");
+  while (!serial.available()) {
+
+  }
+  Serial.println("SA");
   while (serial.available())
   {
     recvBuf[index] = serial.read();
