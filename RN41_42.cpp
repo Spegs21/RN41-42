@@ -9,16 +9,18 @@
 
 RN41_42::RN41_42(HardwareSerial& _serial) : serial(_serial) {
   _commandMode = false;
-  _configChar = '$';
+  _configChar[0] = '$';
+  _configChar[1] = '\0';
   setupIO();
-  setupResponses();
+  //setupResponses();
 }
 
 RN41_42::RN41_42(HardwareSerial& _serial, char configChar) : serial(_serial) {
   _commandMode = false;
-  _configChar = configChar;
+  _configChar[0] = configChar;
+  _configChar[1] = '\0';
   setupIO();
-  setupResponses();
+  //setupResponses();
 }
 
 void RN41_42::begin(unsigned long baudrate)
@@ -51,8 +53,11 @@ char RN41_42::read()
 bool RN41_42::enterCommandMode()
 {
   if (_commandMode) { return true; }
+#ifdef DEBUG
+  Serial.println("Entering cmd mode...");
+#endif
   for (int i = 0; i < 3; i++) { serial.print(_configChar); }
-  if (strncmp_P(getSingleLineResponse(), res.cmd, sizeof(res.cmd)) == 0) { _commandMode = true; return true; }
+  if (strncmp_P(getSingleLineResponse(), PSTR("CMD"), 4) == 0) { _commandMode = true; return true; }
   return false;
 }
 
@@ -61,7 +66,7 @@ bool RN41_42::exitCommandMode()
 {
   if (!_commandMode) { return true; }
   serial.println(F("---"));
-  if (strncmp_P(getSingleLineResponse(), res.end, sizeof(res.end)) == 0) { _commandMode = false; return true; }
+  if (strncmp_P(getSingleLineResponse(), PSTR("END"), 4) == 0) { _commandMode = false; return true; }
   return false;
 }
 
@@ -543,7 +548,7 @@ bool RN41_42::getConnectionStatus()
   return digitalRead(RN41_42_GPIO2);
 #else
   serial.println(F("GK"));
-  return strncmp_P(getSingleLineResponse(), res.one, sizeof(res.one)) == 0 ? true : false;
+  return strncmp_P(getSingleLineResponse(), PSTR("!"), 2) == 0 ? true : false;
 #endif // RN41_42_CONN_PIN
 }
 
@@ -572,9 +577,7 @@ char * RN41_42::displayDipwitchValues()
 bool RN41_42::connectToStoredAddress()
 {
   serial.println(F("C"));
-  if (strncmp_P(getSingleLineResponse(), res.trying, sizeof(res.trying)) == 0) {
-
-  }
+  return evalConnect();
 }
 
 bool RN41_42::connectToAddress(char address[13])
@@ -584,7 +587,7 @@ bool RN41_42::connectToAddress(char address[13])
   //serial.println(buffer);
   serial.print(F("C,"));
   serial.println(address);
-  return strncmp_P(getSingleLineResponse(), res.connected, sizeof(res.connected)) == 0 ? true : false;
+  return evalConnect();
 }
 
 bool RN41_42::connectToAddressFast(char address[13])
@@ -594,19 +597,19 @@ bool RN41_42::connectToAddressFast(char address[13])
   //serial.println(buffer);
   serial.print(F("CF,"));
   serial.println(address);
-  return strncmp_P(getSingleLineResponse(), res.connected, sizeof(res.connected)) == 0 ? true : false;
+  return evalConnect();
 }
 
 bool RN41_42::connectToLastFoundAddressFast()
 {
   serial.println(F("CFI"));
-  return strncmp_P(getSingleLineResponse(), res.connected, sizeof(res.connected)) == 0 ? true : false;
+  return evalConnect();
 }
 
 bool RN41_42::connectToStoredRemoteAddressFast()
 {
   serial.println(F("CFR"));
-  return strncmp_P(getSingleLineResponse(), res.connected, sizeof(res.connected)) == 0 ? true : false;
+  return evalConnect();
 }
 
 bool RN41_42::connectToAddressTimed(char address[13], uint8_t time)
@@ -618,7 +621,7 @@ bool RN41_42::connectToAddressTimed(char address[13], uint8_t time)
   serial.print(address);
   serial.print(F(","));
   serial.println(time);
-  return strncmp_P(getSingleLineResponse(), res.connected, sizeof(res.connected)) == 0 ? true : false;
+  return evalConnect();
 }
 
 bool RN41_42::fastDataMode()
@@ -666,7 +669,7 @@ char * RN41_42::performInquiryScanNN(uint8_t time)
   return getSingleLineResponse();
 }
 
-char * RN41_42::performInquiryScanNN(uint8_t time, uint32_t cod)
+char * RN41_42::performInquiryScanNN(uint8_t time, char cod[7])
 {
   //char buffer[12];
   //snprintf_P(buffer, sizeof(buffer), PSTR("IN%d,%06X"), time, cod);
@@ -674,7 +677,7 @@ char * RN41_42::performInquiryScanNN(uint8_t time, uint32_t cod)
   serial.print(F("IN"));
   serial.print(time);
   serial.print(F(","));
-  serial.println(cod, HEX);
+  serial.println(cod);
   return getSingleLineResponse();
 }
 
@@ -713,7 +716,7 @@ bool RN41_42::hidePIN()
 bool RN41_42::killConnection()
 {
   serial.println(F("K,"));
-  return strncmp_P(getSingleLineResponse(), res.kill, sizeof(res.kill)) == 0 ? true : false;
+  return strncmp_P(getSingleLineResponse(), PSTR("KILL"), 5) == 0 ? true : false;
 }
 
 char * RN41_42::linkQuality()
@@ -746,7 +749,7 @@ void RN41_42::passMessage(char mes[32])
 bool RN41_42::quietMode()
 {
   serial.println(F("Q"));
-  return strncmp_P(getSingleLineResponse(), res.quiet, sizeof(res.quiet)) == 0 ? true : false;
+  return strncmp_P(getSingleLineResponse(), PSTR("Quiet"), 6) == 0 ? true : false;
 }
 
 bool RN41_42::quietMode(uint8_t mode)
@@ -756,7 +759,7 @@ bool RN41_42::quietMode(uint8_t mode)
   //serial.println(buffer);
   serial.print(F("Q,"));
   serial.println(mode);
-  return strncmp_P(getSingleLineResponse(), res.quiet, sizeof(res.quiet)) == 0 ? true : false;
+  return strncmp_P(getSingleLineResponse(), PSTR("Quiet"), 6) == 0 ? true : false;
 }
 
 uint8_t RN41_42::quietStatus()
@@ -775,11 +778,11 @@ bool RN41_42::reset()
   ::digitalWrite(RN41_42_RESET, LOW);
   delay(50);
   ::digitalWrite(RN41_42_RESET, HIGH);
-  delay(500);
+  delay(600);
   return true;
 #else
   serial.println(F("R,1"));
-  if (strncmp_P(getSingleLineResponse(), res.reboot, sizeof(res.reboot)) == 0) {
+  if (strncmp_P(getSingleLineResponse(), PSTR("Reboot!"), 8)) == 0) {
     _commandMode = false;
     delay(500);
     return true;
@@ -912,12 +915,23 @@ bool RN41_42::digitalWritePowerUp(uint8_t pin, uint8_t val)
 char *RN41_42::getSingleLineResponse()
 {
   //Clear the buffer
+  delay(250);
   memset(&recvBuf[0], 0, revBufSize);
   byte index = 0;
   //Wait for the response
-  while (!serial.available()) {}
+
+  while (!serial.available()) {
+#ifdef DEBUG
+      Serial.println("Waiting for serial");
+#endif
+  }
   while (serial.available())
   {
+#ifdef DEBUG
+      Serial.print("SA: ");
+      Serial.println(serial.available());
+#endif
+
     recvBuf[index] = serial.read();
     if (recvBuf[index] != '\n') {
       //Check for overflow
@@ -972,19 +986,26 @@ void RN41_42::setupIO()
 #endif // RN41_42_GPIO
 }
 
-void RN41_42::setupResponses()
-{
-  res.cmd = PSTR("CMD");
-  res.end = PSTR("END");
-  res.trying = PSTR("TRYING");
-  res.reboot = PSTR("Reboot!");
-  res.kill = PSTR("KILL");
-  res.connected = PSTR("Connected");
-  res.quiet = PSTR("Quiet");
-  res.aok = PSTR("AOK");
-}
+//void RN41_42::setupResponses()
+//{
+//  res.cmd = PSTR("CMD");
+//  res.end = PSTR("END");
+//  res.trying = PSTR("TRYING");
+//  res.reboot = PSTR("Reboot!");
+//  res.kill = PSTR("KILL");
+//  res.connected = PSTR("Connected");
+//  res.quiet = PSTR("Quiet");
+//  res.aok = PSTR("AOK");
+//}
 
 bool RN41_42::isAOK()
 {
-  return strncmp_P(getSingleLineResponse(), res.aok, sizeof(res.aok)) == 0 ? true : false;
+  return strncmp_P(getSingleLineResponse(), PSTR("AOK"), 4) == 0 ? true : false;
+}
+
+bool RN41_42::evalConnect()
+{
+    if (strncmp_P(getSingleLineResponse(), PSTR("TRYING"), 7) == 0) {
+        Serial.println("OK");
+    }
 }
