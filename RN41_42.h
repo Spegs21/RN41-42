@@ -113,7 +113,7 @@ public:
   char *performInquiryScan(uint8_t time);						//I,<value 1>
   char *performInquiryScan(uint8_t time, uint32_t cod);			//I,<value 1>,<value 2>
   char *performInquiryScanNN(uint8_t time);						//IN,<value 1>
-  char *performInquiryScanNN(uint8_t time, char cod[7]);		//IN,<value 1>,<value 2>
+  char *performInquiryScanNN(uint8_t time, uint32_t cod);		//IN,<value 1>,<value 2>
   char *scanRSSI();												//IQ
   char *performRovingInquiryScan(uint8_t time);					//IS
   char *performCableReplaceInquiryScan(uint8_t time);			//IR
@@ -141,22 +141,11 @@ public:
 
 private:
 
-  //struct responses {
-  //  const PROGMEM char* cmd;
-  //  const PROGMEM char* end;
-  //  const PROGMEM char* trying;
-  //  const PROGMEM char* reboot;
-  //  const PROGMEM char* kill;
-  //  const PROGMEM char* connected;
-  //  const PROGMEM char* quiet;
-  //  const PROGMEM char* aok;
-  //} res;
-
   //Vaiables
   HardwareSerial& serial;
   bool _commandMode;
   unsigned long _baud;
-  char _configChar[2];
+  char _configChar;
 
   //GPIO Bitmasks
   uint8_t gpioSetDir = 0U;
@@ -171,10 +160,8 @@ private:
 
   //Private Commands
   void setupIO();
-  //void setupResponses();
   char *getSingleLineResponse();
   bool isAOK();
-  bool evalConnect();
 
 };
 
