@@ -141,23 +141,11 @@ public:
 
 private:
 
-  struct responses {
-    const PROGMEM char* cmd;
-    const PROGMEM char* end;
-    const PROGMEM char* trying;
-    const PROGMEM char* reboot;
-    const PROGMEM char* kill;
-    const PROGMEM char* connected;
-    const PROGMEM char* quiet;
-    const PROGMEM char* aok;
-  };
-
   //Vaiables
   HardwareSerial& serial;
   bool _commandMode;
   unsigned long _baud;
   char _configChar;
-  responses res;
 
   //GPIO Bitmasks
   uint8_t gpioSetDir = 0U;
@@ -172,7 +160,6 @@ private:
 
   //Private Commands
   void setupIO();
-  void setupResponses();
   char *getSingleLineResponse();
   bool isAOK();
 

@@ -11,14 +11,12 @@ RN41_42::RN41_42(HardwareSerial& _serial) : serial(_serial) {
   _commandMode = false;
   _configChar = '$';
   setupIO();
-  setupResponses();
 }
 
 RN41_42::RN41_42(HardwareSerial& _serial, char configChar) : serial(_serial) {
   _commandMode = false;
   _configChar = configChar;
   setupIO();
-  setupResponses();
 }
 
 void RN41_42::begin(unsigned long baudrate)
@@ -52,7 +50,7 @@ bool RN41_42::enterCommandMode()
 {
   if (_commandMode) { return true; }
   for (int i = 0; i < 3; i++) { serial.print(_configChar); }
-  if (strncmp_P(getSingleLineResponse(), res.cmd, sizeof(res.cmd)) == 0) { _commandMode = true; return true; }
+  if (strncmp_P(getSingleLineResponse(), PSTR("CMD"), 4) == 0) { _commandMode = true; return true; }
   return false;
 }
 
@@ -61,7 +59,7 @@ bool RN41_42::exitCommandMode()
 {
   if (!_commandMode) { return true; }
   serial.println(F("---"));
-  if (strncmp_P(getSingleLineResponse(), res.end, sizeof(res.end)) == 0) { _commandMode = false; return true; }
+  if (strncmp_P(getSingleLineResponse(), PSTR("END"), 4) == 0) { _commandMode = false; return true; }
   return false;
 }
 
@@ -572,7 +570,7 @@ char * RN41_42::displayDipwitchValues()
 bool RN41_42::connectToStoredAddress()
 {
   serial.println(F("C"));
-  if (strncmp_P(getSingleLineResponse(), res.trying, sizeof(res.trying)) == 0) {
+  if (strncmp_P(getSingleLineResponse(), PSTR("Trying"), 7) == 0) {
 
   }
 }
@@ -584,7 +582,7 @@ bool RN41_42::connectToAddress(char address[13])
   //serial.println(buffer);
   serial.print(F("C,"));
   serial.println(address);
-  return strncmp_P(getSingleLineResponse(), res.connected, sizeof(res.connected)) == 0 ? true : false;
+  return false;
 }
 
 bool RN41_42::connectToAddressFast(char address[13])
@@ -594,19 +592,19 @@ bool RN41_42::connectToAddressFast(char address[13])
   //serial.println(buffer);
   serial.print(F("CF,"));
   serial.println(address);
-  return strncmp_P(getSingleLineResponse(), res.connected, sizeof(res.connected)) == 0 ? true : false;
+  return false;
 }
 
 bool RN41_42::connectToLastFoundAddressFast()
 {
   serial.println(F("CFI"));
-  return strncmp_P(getSingleLineResponse(), res.connected, sizeof(res.connected)) == 0 ? true : false;
+  return false;
 }
 
 bool RN41_42::connectToStoredRemoteAddressFast()
 {
   serial.println(F("CFR"));
-  return strncmp_P(getSingleLineResponse(), res.connected, sizeof(res.connected)) == 0 ? true : false;
+  return false;
 }
 
 bool RN41_42::connectToAddressTimed(char address[13], uint8_t time)
@@ -618,7 +616,7 @@ bool RN41_42::connectToAddressTimed(char address[13], uint8_t time)
   serial.print(address);
   serial.print(F(","));
   serial.println(time);
-  return strncmp_P(getSingleLineResponse(), res.connected, sizeof(res.connected)) == 0 ? true : false;
+  return false;
 }
 
 bool RN41_42::fastDataMode()
@@ -713,7 +711,7 @@ bool RN41_42::hidePIN()
 bool RN41_42::killConnection()
 {
   serial.println(F("K,"));
-  return strncmp_P(getSingleLineResponse(), res.kill, sizeof(res.kill)) == 0 ? true : false;
+  return strncmp_P(getSingleLineResponse(), PSTR("KILL"), 5) == 0 ? true : false;
 }
 
 char * RN41_42::linkQuality()
@@ -746,7 +744,7 @@ void RN41_42::passMessage(char mes[32])
 bool RN41_42::quietMode()
 {
   serial.println(F("Q"));
-  return strncmp_P(getSingleLineResponse(), res.quiet, sizeof(res.quiet)) == 0 ? true : false;
+  return strncmp_P(getSingleLineResponse(), PSTR("Quiet"), 6) == 0 ? true : false;
 }
 
 bool RN41_42::quietMode(uint8_t mode)
@@ -756,7 +754,7 @@ bool RN41_42::quietMode(uint8_t mode)
   //serial.println(buffer);
   serial.print(F("Q,"));
   serial.println(mode);
-  return strncmp_P(getSingleLineResponse(), res.quiet, sizeof(res.quiet)) == 0 ? true : false;
+  return strncmp_P(getSingleLineResponse(), PSTR("Quiet"), 6) == 0 ? true : false;
 }
 
 uint8_t RN41_42::quietStatus()
@@ -830,6 +828,7 @@ bool RN41_42::enableDiscoveryConnection()
 void RN41_42::sleep()
 {
   serial.println(F("Z"));
+  serial.flush();
   _commandMode = false;
 }
 
@@ -911,6 +910,8 @@ bool RN41_42::digitalWritePowerUp(uint8_t pin, uint8_t val)
 
 char *RN41_42::getSingleLineResponse()
 {
+  //Make sure all characters were sent
+  serial.flush();
   //Clear the buffer
   memset(&recvBuf[0], 0, revBufSize);
   byte index = 0;
@@ -972,19 +973,7 @@ void RN41_42::setupIO()
 #endif // RN41_42_GPIO
 }
 
-void RN41_42::setupResponses()
-{
-  res.cmd = PSTR("CMD");
-  res.end = PSTR("END");
-  res.trying = PSTR("TRYING");
-  res.reboot = PSTR("Reboot!");
-  res.kill = PSTR("KILL");
-  res.connected = PSTR("Connected");
-  res.quiet = PSTR("Quiet");
-  res.aok = PSTR("AOK");
-}
-
 bool RN41_42::isAOK()
 {
-  return strncmp_P(getSingleLineResponse(), res.aok, sizeof(res.aok)) == 0 ? true : false;
+  return strncmp_P(getSingleLineResponse(), PSTR("AOK"), 4) == 0 ? true : false;
 }
