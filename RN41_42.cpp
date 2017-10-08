@@ -776,7 +776,7 @@ bool RN41_42::reset()
       return false;
     }
     else {
-      if (startMillis + readyMillis > millis()) {
+      if (millis() - startMillis < readyMillis) {
         return false;
       }
       else {
@@ -785,7 +785,7 @@ bool RN41_42::reset()
       }
     }
   case LOW:
-    if (startMillis + lowMillis > millis()) {
+    if (millis() - startMillis < lowMillis) {
       return false;
     }
     else {
@@ -808,7 +808,7 @@ bool RN41_42::reset()
     }
   }
   else {
-    if (startMillis + readyMillis > millis()) {
+    if (millis() - startMillis < readyMillis) {
       return false;
     }
     else {
