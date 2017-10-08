@@ -51,7 +51,7 @@ char RN41_42::read()
 bool RN41_42::enterCommandMode()
 {
   if (_commandMode) { return true; }
-  for (int i = 0; i < 3; i++) { serial.print(_configChar); delay(25); }
+  for (int i = 0; i < 3; i++) { serial.print(_configChar);}
   if (strncmp_P(getSingleLineResponse(), PSTR("CMD"), 4) == 0) { _commandMode = true; return true; }
   return false;
 }
@@ -85,17 +85,7 @@ char *RN41_42::recieveMessage()
 #ifdef RN41_42_GPIO4
 void RN41_42::factoryReset()
 {
-  ::digitalWrite(RN41_42_GPIO4, HIGH);
-  reset();
-  delay(500);
-  ::digitalWrite(RN41_42_GPIO4, LOW);
-  delay(1000);
-  ::digitalWrite(RN41_42_GPIO4, HIGH);
-  ::digitalWrite(RN41_42_GPIO4, LOW);
-  delay(1000);
-  ::digitalWrite(RN41_42_GPIO4, HIGH);
-  ::digitalWrite(RN41_42_GPIO4, LOW);
-  reset();
+//Not implemented
 }
 #endif // RN41_42_GPIO4
 
@@ -771,21 +761,60 @@ uint8_t RN41_42::quietStatus()
 //Device Must Be Reset After A Config Change To Take Effect
 bool RN41_42::reset()
 {
-#ifdef RN41_42_RESET
-  ::digitalWrite(RN41_42_RESET, LOW);
-  delay(50);
-  ::digitalWrite(RN41_42_RESET, HIGH);
-  delay(500);
-  return true;
-#else
-  serial.println(F("R,1"));
-  if (strncmp_P(getSingleLineResponse(), res.reboot, sizeof(res.reboot)) == 0) {
-    _commandMode = false;
-    delay(500);
-    return true;
-  }
-  return false;
+  static const uint32_t lowMillis = 50UL;
+  static const uint32_t readyMillis = 500UL;
+  static uint32_t startMillis = 0UL;
 
+#ifdef RN41_42_RESET
+  
+  switch (::digitalRead(RN41_42_RESET)) {
+  case HIGH:
+    if (startMillis == 0UL) {
+      ::digitalWrite(RN41_42_RESET, LOW);
+      startMillis = millis();
+      return false;
+    }
+    else {
+      if (startMillis + readyMillis > millis()) {
+        return false;
+      }
+      else {
+        startMillis = 0UL;
+        return true;
+      }
+    }
+  case LOW:
+    if (startMillis + lowMillis > millis()) {
+      return false;
+    }
+    else {
+      ::digitalWrite(RN41_42_RESET, HIGH);
+      startMillis = millis();
+      return false;
+    }
+  }
+
+#else
+  if (startMillis == 0) {
+    serial.println(F("R,1"));
+    if (strncmp_P(getSingleLineResponse(), PSTR("Reboot!"), 8) == 0) {
+      startMillis = millis();
+      _commandMode = false;
+      return false;
+    }
+    else {
+      return false;
+    }
+  }
+  else {
+    if (startMillis + readyMillis > millis()) {
+      return false;
+    }
+    else {
+      startMillis = 0UL;
+      return true;
+    }
+  }
 #endif // RN41_42_RESET_PIN
 }
 
@@ -914,7 +943,6 @@ char *RN41_42::getSingleLineResponse()
 {
   //Make sure all characters were sent
   serial.flush();
-  delay(100);
   //Clear the buffer
   memset(&recvBuf[0], 0, revBufSize);
   byte index = 0;
