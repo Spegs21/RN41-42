@@ -756,6 +756,7 @@ uint8_t RN41_42::quietStatus()
 }
 
 //Resets The Device
+//Must be called repeatedly until true is returned before sending commands to the module
 //Also Exits Command Mode
 //Uses GPIO over serial commands if available
 //Device Must Be Reset After A Config Change To Take Effect
